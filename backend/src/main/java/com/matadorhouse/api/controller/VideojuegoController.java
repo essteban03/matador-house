@@ -13,6 +13,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/videojuegos")
+@CrossOrigin(origins = "https://matador-house.vercel.app")
 public class VideojuegoController {
 
     private final VideojuegoRepository videojuegoRepository;
