@@ -34,12 +34,12 @@ export function PaymentTicker() {
           <motion.div
             className="flex items-center whitespace-nowrap will-change-transform text-cyan-300"
             animate={{ x: "-50%" }}
-            transition={{ repeat: Infinity, ease: "linear", duration: 45 }}
+            transition={{ repeat: Infinity, ease: "linear", duration: 32 }}
           >
-            <div className="flex w-1/2 items-center">
+            <div className="flex flex-none items-center w-max">
               <BankRow />
             </div>
-            <div className="flex w-1/2 items-center">
+            <div className="flex flex-none items-center w-max">
               <BankRow />
             </div>
           </motion.div>
