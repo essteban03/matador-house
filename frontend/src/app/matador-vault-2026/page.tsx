@@ -59,7 +59,9 @@ const initialStockForm: StockFormState = {
   tipoCuenta: "PRINCIPAL",
 };
 
-const API_BASE = "http://localhost:8080/api/videojuegos";
+const API_ORIGIN = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+
+const API_BASE = `${API_ORIGIN.replace(/\/$/, "")}/api/videojuegos`;
 
 function AdminDashboard() {
   const [games, setGames] = useState<Videojuego[]>([]);

@@ -53,7 +53,11 @@ export default function JuegoDetallePage() {
   useEffect(() => {
     const fetchJuego = async () => {
       try {
-        const res = await fetch("http://localhost:8080/api/videojuegos");
+        const apiOrigin =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+        const res = await fetch(
+          `${apiOrigin.replace(/\/$/, "")}/api/videojuegos`
+        );
         if (!res.ok) throw new Error("Error al cargar el videojuego");
         const data: Videojuego[] = await res.json();
         setListaVideojuegos(data);

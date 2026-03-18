@@ -74,7 +74,11 @@ export default function Home() {
   useEffect(() => {
     const fetchVideojuegos = async () => {
       try {
-        const res = await fetch("http://localhost:8080/api/videojuegos");
+        const apiOrigin =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+        const res = await fetch(
+          `${apiOrigin.replace(/\/$/, "")}/api/videojuegos`
+        );
         if (!res.ok) throw new Error("Error al cargar los videojuegos");
         const data: Videojuego[] = await res.json();
         setVideojuegos(data);
@@ -280,8 +284,9 @@ export default function Home() {
         {!loading && error && (
           <div className="flex flex-1 items-center justify-center">
             <p className="text-sm text-red-400">
-              {error} — verifica que el backend esté corriendo en{" "}
-              <span className="font-mono">http://localhost:8080</span>.
+              {error} — verifica que el backend esté corriendo y que{" "}
+              <span className="font-mono">NEXT_PUBLIC_API_URL</span> esté
+              configurada correctamente.
             </p>
           </div>
         )}
