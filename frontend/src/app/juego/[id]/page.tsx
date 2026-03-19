@@ -78,6 +78,23 @@ export default function JuegoDetallePage() {
       ? juego?.precioPrincipal ?? MOCK_JUEGO.precioPrincipal
       : juego?.precioSecundaria ?? MOCK_JUEGO.precioSecundaria;
 
+  const hasPrecioPrincipal = (juego?.precioPrincipal ?? 0) > 0;
+  const hasPrecioSecundaria = (juego?.precioSecundaria ?? 0) > 0;
+  const isPrecioSeleccionadoDisponible =
+    selectedTipoCuenta === "PRINCIPAL"
+      ? hasPrecioPrincipal
+      : hasPrecioSecundaria;
+
+  useEffect(() => {
+    // Si solo existe precio en una cuenta, forzamos que el usuario
+    // seleccione únicamente la que tiene valor.
+    if (!hasPrecioPrincipal && hasPrecioSecundaria) {
+      setSelectedTipoCuenta("SECUNDARIA");
+    } else if (!hasPrecioSecundaria && hasPrecioPrincipal) {
+      setSelectedTipoCuenta("PRINCIPAL");
+    }
+  }, [juego?.id, hasPrecioPrincipal, hasPrecioSecundaria]);
+
   const tituloActual = juego?.titulo ?? "";
   const existsPs4Version = listaVideojuegos.some(
     (v) => v.titulo === tituloActual && v.consola === "PS4"
@@ -90,6 +107,11 @@ export default function JuegoDetallePage() {
 
   const handleAddToCart = () => {
     if (!juego) return;
+    const precioSeleccionado =
+      selectedTipoCuenta === "PRINCIPAL"
+        ? juego.precioPrincipal
+        : juego.precioSecundaria;
+    if (precioSeleccionado <= 0) return;
     addToCart({
       gameId: juego.id,
       titulo: juego.titulo,
@@ -222,8 +244,11 @@ export default function JuegoDetallePage() {
                 <button
                   type="button"
                   onClick={() => setSelectedTipoCuenta("PRINCIPAL")}
+                  disabled={!hasPrecioPrincipal}
                   className={`rounded-2xl border px-4 py-4 text-left text-xs transition ${
-                    selectedTipoCuenta === "PRINCIPAL"
+                    !hasPrecioPrincipal
+                      ? "cursor-not-allowed border-zinc-800 bg-zinc-950/40 opacity-50"
+                      : selectedTipoCuenta === "PRINCIPAL"
                       ? "border-emerald-400/80 bg-emerald-400/10"
                       : "border-zinc-800 bg-zinc-950/60 hover:border-zinc-700"
                   }`}
@@ -238,8 +263,11 @@ export default function JuegoDetallePage() {
                 <button
                   type="button"
                   onClick={() => setSelectedTipoCuenta("SECUNDARIA")}
+                  disabled={!hasPrecioSecundaria}
                   className={`rounded-2xl border px-4 py-4 text-left text-xs transition ${
-                    selectedTipoCuenta === "SECUNDARIA"
+                    !hasPrecioSecundaria
+                      ? "cursor-not-allowed border-zinc-800 bg-zinc-950/40 opacity-50"
+                      : selectedTipoCuenta === "SECUNDARIA"
                       ? "border-sky-400/80 bg-sky-400/10"
                       : "border-zinc-800 bg-zinc-950/60 hover:border-zinc-700"
                   }`}
@@ -279,13 +307,16 @@ export default function JuegoDetallePage() {
               <motion.button
                 type="button"
                 onClick={handleAddToCart}
+                disabled={!isPrecioSeleccionadoDisponible}
                 className="group relative inline-flex w-full items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-500 via-cyan-500 to-sky-500 px-6 py-4 text-sm font-semibold tracking-wide text-black shadow-[0_0_32px_rgba(34,197,94,0.6)] disabled:cursor-not-allowed disabled:opacity-60"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.97 }}
+                whileHover={isPrecioSeleccionadoDisponible ? { scale: 1.02 } : {}}
+                whileTap={isPrecioSeleccionadoDisponible ? { scale: 0.97 } : {}}
               >
                 <span className="absolute inset-0 -z-10 animate-pulse bg-gradient-to-r from-emerald-400/40 via-cyan-400/40 to-sky-400/40 opacity-60 blur-xl" />
                 <span>
-                  Añadir al carrito
+                  {isPrecioSeleccionadoDisponible
+                    ? "Añadir al carrito"
+                    : "Precio no disponible"}
                 </span>
               </motion.button>
             </div>
