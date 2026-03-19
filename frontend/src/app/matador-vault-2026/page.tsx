@@ -63,6 +63,10 @@ const API_ORIGIN = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 const API_BASE = `${API_ORIGIN.replace(/\/$/, "")}/api/videojuegos`;
 
+// Demanda principal: ocultar herramientas de carga de stock en el admin.
+// Se mantiene la lógica/modal para uso futuro.
+const SHOW_STOCK_TOOLS = false;
+
 function AdminDashboard() {
   const [games, setGames] = useState<Videojuego[]>([]);
   const [loading, setLoading] = useState(true);
@@ -348,13 +352,15 @@ function AdminDashboard() {
                     </td>
                     <td className="px-5 py-4">
                       <div className="flex justify-end gap-2">
-                        <button
-                          type="button"
-                          onClick={() => openStockModal(g)}
-                          className="rounded-full border border-zinc-800 bg-zinc-950/70 px-3 py-2 text-[11px] font-semibold text-zinc-200 hover:border-zinc-700"
-                        >
-                          Cargar stock
-                        </button>
+                        {SHOW_STOCK_TOOLS && (
+                          <button
+                            type="button"
+                            onClick={() => openStockModal(g)}
+                            className="rounded-full border border-zinc-800 bg-zinc-950/70 px-3 py-2 text-[11px] font-semibold text-zinc-200 hover:border-zinc-700"
+                          >
+                            Cargar stock
+                          </button>
+                        )}
                         <button
                           type="button"
                           onClick={() => handleOpenEdit(g)}

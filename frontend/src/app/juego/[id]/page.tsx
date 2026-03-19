@@ -78,12 +78,6 @@ export default function JuegoDetallePage() {
       ? juego?.precioPrincipal ?? MOCK_JUEGO.precioPrincipal
       : juego?.precioSecundaria ?? MOCK_JUEGO.precioSecundaria;
 
-  const stockPrincipal = juego?.stockPrincipal ?? 0;
-  const stockSecundaria = juego?.stockSecundaria ?? 0;
-  const selectedStock =
-    selectedTipoCuenta === "PRINCIPAL" ? stockPrincipal : stockSecundaria;
-  const isSelectedTypeAvailable = selectedStock > 0;
-
   const tituloActual = juego?.titulo ?? "";
   const existsPs4Version = listaVideojuegos.some(
     (v) => v.titulo === tituloActual && v.consola === "PS4"
@@ -96,7 +90,6 @@ export default function JuegoDetallePage() {
 
   const handleAddToCart = () => {
     if (!juego) return;
-    if (!isSelectedTypeAvailable) return;
     addToCart({
       gameId: juego.id,
       titulo: juego.titulo,
@@ -167,12 +160,6 @@ export default function JuegoDetallePage() {
                         </span>
                       </div>
                     )}
-                    <div className="flex items-center justify-between">
-                      <span className="text-zinc-500">Stock</span>
-                      <span className="text-zinc-200">
-                        {stockPrincipal} P / {stockSecundaria} S
-                      </span>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -235,11 +222,8 @@ export default function JuegoDetallePage() {
                 <button
                   type="button"
                   onClick={() => setSelectedTipoCuenta("PRINCIPAL")}
-                  disabled={stockPrincipal <= 0}
                   className={`rounded-2xl border px-4 py-4 text-left text-xs transition ${
-                    stockPrincipal <= 0
-                      ? "cursor-not-allowed border-zinc-800 bg-zinc-950/40 opacity-50"
-                      : selectedTipoCuenta === "PRINCIPAL"
+                    selectedTipoCuenta === "PRINCIPAL"
                       ? "border-emerald-400/80 bg-emerald-400/10"
                       : "border-zinc-800 bg-zinc-950/60 hover:border-zinc-700"
                   }`}
@@ -254,11 +238,8 @@ export default function JuegoDetallePage() {
                 <button
                   type="button"
                   onClick={() => setSelectedTipoCuenta("SECUNDARIA")}
-                  disabled={stockSecundaria <= 0}
                   className={`rounded-2xl border px-4 py-4 text-left text-xs transition ${
-                    stockSecundaria <= 0
-                      ? "cursor-not-allowed border-zinc-800 bg-zinc-950/40 opacity-50"
-                      : selectedTipoCuenta === "SECUNDARIA"
+                    selectedTipoCuenta === "SECUNDARIA"
                       ? "border-sky-400/80 bg-sky-400/10"
                       : "border-zinc-800 bg-zinc-950/60 hover:border-zinc-700"
                   }`}
@@ -298,14 +279,13 @@ export default function JuegoDetallePage() {
               <motion.button
                 type="button"
                 onClick={handleAddToCart}
-                disabled={!isSelectedTypeAvailable}
                 className="group relative inline-flex w-full items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-500 via-cyan-500 to-sky-500 px-6 py-4 text-sm font-semibold tracking-wide text-black shadow-[0_0_32px_rgba(34,197,94,0.6)] disabled:cursor-not-allowed disabled:opacity-60"
-                whileHover={isSelectedTypeAvailable ? { scale: 1.02 } : {}}
-                whileTap={isSelectedTypeAvailable ? { scale: 0.97 } : {}}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
               >
                 <span className="absolute inset-0 -z-10 animate-pulse bg-gradient-to-r from-emerald-400/40 via-cyan-400/40 to-sky-400/40 opacity-60 blur-xl" />
                 <span>
-                  {isSelectedTypeAvailable ? "Añadir al carrito" : "Agotado"}
+                  Añadir al carrito
                 </span>
               </motion.button>
             </div>

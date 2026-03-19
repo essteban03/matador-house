@@ -419,7 +419,7 @@ export default function Home() {
                                 <p className="bg-gradient-to-r from-emerald-400 via-cyan-400 to-emerald-300 bg-clip-text text-2xl font-extrabold text-transparent">
                                   {new Intl.NumberFormat("es-ES", {
                                     style: "currency",
-                                    currency: "EUR",
+                                    currency: "USD",
                                   }).format(
                                     Math.min(
                                       game.precioPrincipal,
