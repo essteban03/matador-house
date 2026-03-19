@@ -421,10 +421,9 @@ export default function Home() {
                                     style: "currency",
                                     currency: "USD",
                                   }).format(
-                                    Math.min(
-                                      game.precioPrincipal,
-                                      game.precioSecundaria
-                                    )
+                                    game.precioPrincipal > 0
+                                      ? game.precioPrincipal
+                                      : game.precioSecundaria
                                   )}
                                 </p>
                               </div>
