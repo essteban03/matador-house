@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { Hero } from "../components/Hero";
 import { PaymentTicker } from "../components/PaymentTicker";
+import { ConfettiBurst } from "../components/ConfettiBurst";
 
 type Videojuego = {
   id: number;
@@ -14,6 +15,10 @@ type Videojuego = {
   categoria?: string | null;
   precioPrincipal: number;
   precioSecundaria: number;
+  precioOfertaPrincipal?: number | null;
+  precioOfertaSecundaria?: number | null;
+  ofertaDesde?: string | null;
+  ofertaHasta?: string | null;
   pesoGb?: number | null;
   enStock: boolean;
   imagenUrl?: string | null;
@@ -41,6 +46,20 @@ function normalize(s: string) {
     .toLowerCase()
     .normalize("NFD")
     .replace(/\p{M}/gu, "");
+}
+
+function parseLocalDate(value?: string | null, endOfDay = false): Date | null {
+  if (!value) return null;
+  const [yearRaw, monthRaw, dayRaw] = value.split("-");
+  const year = Number(yearRaw);
+  const month = Number(monthRaw);
+  const day = Number(dayRaw);
+  if (!year || !month || !day) return null;
+
+  if (endOfDay) {
+    return new Date(year, month - 1, day, 23, 59, 59, 999);
+  }
+  return new Date(year, month - 1, day, 0, 0, 0, 0);
 }
 
 function matchesCategoryTab(game: Videojuego, tab: CategoryTab): boolean {
@@ -101,9 +120,67 @@ export default function Home() {
   }, [videojuegos, search, activeTab]);
 
   const scrollToOffers = () => {
-    const el = document.getElementById("ofertas");
+    const el = document.getElementById("ofertas-marzo");
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
+
+  const ofertasMarzo = useMemo(() => {
+    const ahora = Date.now();
+    return videojuegos
+      .filter((game) => {
+        if (!game.ofertaDesde || !game.ofertaHasta) return false;
+
+        const start = parseLocalDate(game.ofertaDesde, false);
+        const end = parseLocalDate(game.ofertaHasta, true);
+        if (
+          start == null ||
+          end == null ||
+          Number.isNaN(start.getTime()) ||
+          Number.isNaN(end.getTime())
+        )
+          return false;
+
+        const hasOferta =
+          (game.precioOfertaPrincipal ?? 0) > 0 ||
+          (game.precioOfertaSecundaria ?? 0) > 0;
+
+        return hasOferta && ahora >= start.getTime() && ahora <= end.getTime();
+      })
+      .sort((a, b) => {
+        const aSpecial =
+          (a.precioOfertaPrincipal ?? 0) > 0
+            ? (a.precioOfertaPrincipal ?? 0)
+            : (a.precioOfertaSecundaria ?? 0);
+        const bSpecial =
+          (b.precioOfertaPrincipal ?? 0) > 0
+            ? (b.precioOfertaPrincipal ?? 0)
+            : (b.precioOfertaSecundaria ?? 0);
+        return aSpecial - bSpecial;
+      });
+  }, [videojuegos]);
+
+  const ofertasMarzoRef = useRef<HTMLElement | null>(null);
+  const [showConfetti, setShowConfetti] = useState(false);
+
+  useEffect(() => {
+    const el = ofertasMarzoRef.current;
+    if (!el) return;
+    if (showConfetti) return;
+
+    const obs = new IntersectionObserver(
+      (entries) => {
+        const first = entries[0];
+        if (first?.isIntersecting) {
+          setShowConfetti(true);
+          obs.disconnect();
+        }
+      },
+      { threshold: 0.2 }
+    );
+
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [ofertasMarzo.length, showConfetti]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-black via-zinc-950 to-zinc-900 text-zinc-50">
@@ -197,6 +274,128 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {/* Ofertas de Marzo */}
+        {!loading && !error && ofertasMarzo.length > 0 && (
+          <section
+            ref={ofertasMarzoRef}
+            id="ofertas-marzo"
+            className="relative mb-10 overflow-hidden rounded-3xl border border-cyan-500/20 bg-gradient-to-b from-cyan-950/30 via-zinc-950/60 to-black px-4 py-6 shadow-[0_0_45px_rgba(6,182,212,0.10)] sm:px-7 sm:py-8"
+          >
+            <ConfettiBurst active={showConfetti} />
+
+            <div className="relative z-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-300/80">
+                  OFERTAS DE MARZO
+                </p>
+                <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-zinc-50 sm:text-3xl">
+                  Precios especiales de tiempo limitado
+                </h2>
+              </div>
+              <div className="rounded-2xl border border-cyan-400/30 bg-cyan-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-200">
+                Activas ahora
+              </div>
+            </div>
+
+            <div className="relative z-10 mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {ofertasMarzo.map((game) => {
+                const usaPrincipal = (game.precioOfertaPrincipal ?? 0) > 0;
+                const precioEspecial = usaPrincipal
+                  ? game.precioOfertaPrincipal ?? 0
+                  : game.precioOfertaSecundaria ?? 0;
+                const precioAntes = usaPrincipal
+                  ? game.precioPrincipal
+                  : game.precioSecundaria;
+
+                return (
+                  <Link
+                    key={game.id}
+                    href={`/juego/${game.id}`}
+                    className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-cyan-400/20 bg-gradient-to-br from-cyan-950/10 via-zinc-950/60 to-black p-4 shadow-[0_0_25px_rgba(0,255,255,0.10)] transition hover:border-cyan-400/40"
+                  >
+                    <div className="absolute right-3 top-3 rounded-full border border-cyan-400/40 bg-cyan-500/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-200">
+                      OFERTA
+                    </div>
+
+                    <div className="relative mb-3 aspect-[4/3] w-full shrink-0 overflow-hidden rounded-xl bg-zinc-900/80">
+                      {game.imagenUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={game.imagenUrl}
+                          alt={game.titulo}
+                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                        />
+                      ) : (
+                        <div className="flex h-full items-center justify-center text-xs text-zinc-600">
+                          Sin imagen
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="mb-2 flex items-center justify-between gap-2">
+                      <span
+                        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${
+                          game.consola === "PS5"
+                            ? "bg-gradient-to-r from-indigo-500 to-violet-500 text-white"
+                            : "bg-gradient-to-r from-sky-500 to-emerald-400 text-black"
+                        }`}
+                      >
+                        {game.consola}
+                      </span>
+                      {game.categoria && (
+                        <span className="truncate text-[10px] uppercase tracking-wider text-zinc-500">
+                          {game.categoria}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="min-h-[56px]">
+                      <h3 className="line-clamp-2 text-lg font-semibold tracking-tight text-zinc-50">
+                        {game.titulo}
+                      </h3>
+                    </div>
+
+                    <div className="mt-auto border-t border-zinc-800/60 pt-3">
+                      <div className="flex items-end justify-between gap-3">
+                        <div className="space-y-1 text-xs text-zinc-500">
+                          <p>
+                            <span className="text-zinc-400">Stock:</span>{" "}
+                            <span
+                              className={
+                                game.enStock ? "text-emerald-400" : "text-red-400"
+                              }
+                            >
+                              {game.enStock ? "Disponible" : "Agotado"}
+                            </span>
+                          </p>
+                        </div>
+
+                        <div className="text-right">
+                          <p className="text-[11px] font-medium text-zinc-400">
+                            Antes
+                          </p>
+                          <p className="text-sm font-semibold text-zinc-500 line-through">
+                            {new Intl.NumberFormat("es-ES", {
+                              style: "currency",
+                              currency: "USD",
+                            }).format(precioAntes)}
+                          </p>
+                          <p className="bg-gradient-to-r from-emerald-400 via-cyan-400 to-emerald-300 bg-clip-text text-2xl font-extrabold text-transparent">
+                            {new Intl.NumberFormat("es-ES", {
+                              style: "currency",
+                              currency: "USD",
+                            }).format(precioEspecial)}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
         {/* Filtros */}
         {!loading && !error && videojuegos.length > 0 && (

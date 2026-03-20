@@ -14,12 +14,30 @@ type Videojuego = {
   descripcion?: string | null;
   precioPrincipal: number;
   precioSecundaria: number;
+  precioOfertaPrincipal?: number | null;
+  precioOfertaSecundaria?: number | null;
+  ofertaDesde?: string | null;
+  ofertaHasta?: string | null;
   pesoGb?: number | null;
   enStock: boolean;
   imagenUrl?: string | null;
   stockPrincipal?: number;
   stockSecundaria?: number;
 };
+
+function parseLocalDate(value?: string | null, endOfDay = false): Date | null {
+  if (!value) return null;
+  const [yearRaw, monthRaw, dayRaw] = value.split("-");
+  const year = Number(yearRaw);
+  const month = Number(monthRaw);
+  const day = Number(dayRaw);
+  if (!year || !month || !day) return null;
+
+  if (endOfDay) {
+    return new Date(year, month - 1, day, 23, 59, 59, 999);
+  }
+  return new Date(year, month - 1, day, 0, 0, 0, 0);
+}
 
 const MOCK_JUEGO: Videojuego = {
   id: 1,
@@ -73,17 +91,44 @@ export default function JuegoDetallePage() {
     fetchJuego();
   }, [params?.id]);
 
-  const precioActual =
-    selectedTipoCuenta === "PRINCIPAL"
-      ? juego?.precioPrincipal ?? MOCK_JUEGO.precioPrincipal
-      : juego?.precioSecundaria ?? MOCK_JUEGO.precioSecundaria;
+  const ofertaDesde = parseLocalDate(juego?.ofertaDesde, false);
+  const ofertaHasta = parseLocalDate(juego?.ofertaHasta, true);
+  const ofertaActiva =
+    ofertaDesde != null &&
+    ofertaHasta != null &&
+    !Number.isNaN(ofertaDesde.getTime()) &&
+    !Number.isNaN(ofertaHasta.getTime()) &&
+    Date.now() >= ofertaDesde.getTime() &&
+    Date.now() <= ofertaHasta.getTime();
 
-  const hasPrecioPrincipal = (juego?.precioPrincipal ?? 0) > 0;
-  const hasPrecioSecundaria = (juego?.precioSecundaria ?? 0) > 0;
+  const precioPrincipalNormal = juego?.precioPrincipal ?? MOCK_JUEGO.precioPrincipal;
+  const precioSecundariaNormal =
+    juego?.precioSecundaria ?? MOCK_JUEGO.precioSecundaria;
+  const precioPrincipalOferta = juego?.precioOfertaPrincipal ?? 0;
+  const precioSecundariaOferta = juego?.precioOfertaSecundaria ?? 0;
+
+  const precioPrincipalFuente = ofertaActiva
+    ? precioPrincipalOferta
+    : precioPrincipalNormal;
+  const precioSecundariaFuente = ofertaActiva
+    ? precioSecundariaOferta
+    : precioSecundariaNormal;
+
+  const precioActualOferta =
+    selectedTipoCuenta === "PRINCIPAL"
+      ? precioPrincipalFuente
+      : precioSecundariaFuente;
+
+  const hasPrecioPrincipal = precioPrincipalFuente > 0;
+  const hasPrecioSecundaria = precioSecundariaFuente > 0;
   const isPrecioSeleccionadoDisponible =
     selectedTipoCuenta === "PRINCIPAL"
       ? hasPrecioPrincipal
       : hasPrecioSecundaria;
+
+  // Recalcular `precioActual` con fuente (oferta vs normal).
+  // (Se sobreescribe para que el botón/guard usen el precio correcto.)
+  const precioActualFinal = precioActualOferta;
 
   useEffect(() => {
     // Si solo existe precio en una cuenta, forzamos que el usuario
@@ -107,17 +152,13 @@ export default function JuegoDetallePage() {
 
   const handleAddToCart = () => {
     if (!juego) return;
-    const precioSeleccionado =
-      selectedTipoCuenta === "PRINCIPAL"
-        ? juego.precioPrincipal
-        : juego.precioSecundaria;
-    if (precioSeleccionado <= 0) return;
+    if (precioActualFinal <= 0) return;
     addToCart({
       gameId: juego.id,
       titulo: juego.titulo,
       consola: selectedConsola,
       tipoCuenta: selectedTipoCuenta,
-      precio: precioActual,
+      precio: precioActualFinal,
     });
     openCart();
   };
@@ -299,7 +340,7 @@ export default function JuegoDetallePage() {
                     {new Intl.NumberFormat("es-ES", {
                       style: "currency",
                       currency: "USD",
-                    }).format(precioActual)}
+                    }).format(precioActualFinal)}
                   </motion.span>
                 </AnimatePresence>
               </div>

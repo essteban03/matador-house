@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -41,6 +42,21 @@ public class Videojuego {
 
     @Column(nullable = false)
     private BigDecimal precioSecundaria; // Precio para cuenta secundaria
+
+    // -------------------------------
+    // OFERTAS (Ofertas de Marzo)
+    // -------------------------------
+    @Column(nullable = true)
+    private BigDecimal precioOfertaPrincipal; // Precio especial para cuenta principal
+
+    @Column(nullable = true)
+    private BigDecimal precioOfertaSecundaria; // Precio especial para cuenta secundaria
+
+    @Column(nullable = true)
+    private LocalDate ofertaDesde;
+
+    @Column(nullable = true)
+    private LocalDate ofertaHasta;
 
     private Integer pesoGb;
 

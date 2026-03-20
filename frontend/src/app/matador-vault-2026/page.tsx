@@ -16,6 +16,10 @@ type Videojuego = {
   descripcion?: string | null;
   precioPrincipal: number;
   precioSecundaria: number;
+  precioOfertaPrincipal?: number | null;
+  precioOfertaSecundaria?: number | null;
+  ofertaDesde?: string | null;
+  ofertaHasta?: string | null;
   pesoGb?: number | null;
   enStock: boolean;
   imagenUrl?: string | null;
@@ -31,6 +35,10 @@ type FormState = {
   descripcion: string;
   precioPrincipal: string;
   precioSecundaria: string;
+  precioOfertaPrincipal: string;
+  precioOfertaSecundaria: string;
+  ofertaDesde: string;
+  ofertaHasta: string;
   pesoGb: string;
   imagenUrl: string;
 };
@@ -43,6 +51,10 @@ const initialFormState: FormState = {
   descripcion: "",
   precioPrincipal: "",
   precioSecundaria: "",
+  precioOfertaPrincipal: "",
+  precioOfertaSecundaria: "",
+  ofertaDesde: "",
+  ofertaHasta: "",
   pesoGb: "",
   imagenUrl: "",
 };
@@ -86,6 +98,25 @@ function AdminDashboard() {
     [form.categoria]
   );
 
+  const isOfertaActiva = (g: Videojuego) => {
+    const now = new Date();
+    const start = g.ofertaDesde ? new Date(`${g.ofertaDesde}T00:00:00`) : null;
+    const end = g.ofertaHasta ? new Date(`${g.ofertaHasta}T23:59:59`) : null;
+
+    const hasOferta =
+      (g.precioOfertaPrincipal ?? 0) > 0 || (g.precioOfertaSecundaria ?? 0) > 0;
+
+    return (
+      hasOferta &&
+      start != null &&
+      end != null &&
+      !Number.isNaN(start.getTime()) &&
+      !Number.isNaN(end.getTime()) &&
+      now >= start &&
+      now <= end
+    );
+  };
+
   const fetchGames = async () => {
     setLoading(true);
     setError(null);
@@ -127,6 +158,10 @@ function AdminDashboard() {
       descripcion: g.descripcion ?? "",
       precioPrincipal: String(g.precioPrincipal ?? ""),
       precioSecundaria: String(g.precioSecundaria ?? ""),
+      precioOfertaPrincipal: g.precioOfertaPrincipal == null ? "" : String(g.precioOfertaPrincipal),
+      precioOfertaSecundaria: g.precioOfertaSecundaria == null ? "" : String(g.precioOfertaSecundaria),
+      ofertaDesde: g.ofertaDesde ?? "",
+      ofertaHasta: g.ofertaHasta ?? "",
       pesoGb: g.pesoGb == null ? "" : String(g.pesoGb),
       imagenUrl: g.imagenUrl ?? "",
     });
@@ -156,6 +191,10 @@ function AdminDashboard() {
         imagenUrl: form.imagenUrl.trim() || null,
         precioPrincipal: Number(form.precioPrincipal),
         precioSecundaria: Number(form.precioSecundaria),
+        precioOfertaPrincipal: Number(form.precioOfertaPrincipal),
+        precioOfertaSecundaria: Number(form.precioOfertaSecundaria),
+        ofertaDesde: form.ofertaDesde === "" ? null : form.ofertaDesde,
+        ofertaHasta: form.ofertaHasta === "" ? null : form.ofertaHasta,
         pesoGb: isPsPlus ? null : form.pesoGb === "" ? null : Number(form.pesoGb),
         enStock: true,
       };
@@ -330,7 +369,14 @@ function AdminDashboard() {
                     </td>
                     <td className="px-5 py-4 text-zinc-200">{g.consola}</td>
                     <td className="px-5 py-4 text-zinc-300">
-                      {g.categoria ?? "—"}
+                      <div className="flex items-center gap-2">
+                        <span className="truncate">{g.categoria ?? "—"}</span>
+                        {isOfertaActiva(g) && (
+                          <span className="rounded-full border border-cyan-400/40 bg-cyan-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-200">
+                            OFERTA ACTIVA
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-5 py-4 text-zinc-200">
                       {new Intl.NumberFormat("es-ES", {
@@ -475,6 +521,52 @@ function AdminDashboard() {
                     value={form.precioSecundaria}
                     onChange={(e) =>
                       setForm({ ...form, precioSecundaria: e.target.value })
+                    }
+                    inputMode="decimal"
+                    className="w-full rounded-xl border border-zinc-800 bg-black/40 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-emerald-500/60"
+                  />
+                </label>
+
+                {/* Oferta de Marzo */}
+                <label className="space-y-2 text-xs text-zinc-400">
+                  <span>Oferta Desde</span>
+                  <input
+                    type="date"
+                    value={form.ofertaDesde}
+                    onChange={(e) =>
+                      setForm({ ...form, ofertaDesde: e.target.value })
+                    }
+                    className="w-full rounded-xl border border-zinc-800 bg-black/40 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-emerald-500/60"
+                  />
+                </label>
+                <label className="space-y-2 text-xs text-zinc-400">
+                  <span>Oferta Hasta</span>
+                  <input
+                    type="date"
+                    value={form.ofertaHasta}
+                    onChange={(e) =>
+                      setForm({ ...form, ofertaHasta: e.target.value })
+                    }
+                    className="w-full rounded-xl border border-zinc-800 bg-black/40 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-emerald-500/60"
+                  />
+                </label>
+                <label className="space-y-2 text-xs text-zinc-400">
+                  <span>Precio Oferta Principal (USD)</span>
+                  <input
+                    value={form.precioOfertaPrincipal}
+                    onChange={(e) =>
+                      setForm({ ...form, precioOfertaPrincipal: e.target.value })
+                    }
+                    inputMode="decimal"
+                    className="w-full rounded-xl border border-zinc-800 bg-black/40 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-emerald-500/60"
+                  />
+                </label>
+                <label className="space-y-2 text-xs text-zinc-400">
+                  <span>Precio Oferta Secundaria (USD)</span>
+                  <input
+                    value={form.precioOfertaSecundaria}
+                    onChange={(e) =>
+                      setForm({ ...form, precioOfertaSecundaria: e.target.value })
                     }
                     inputMode="decimal"
                     className="w-full rounded-xl border border-zinc-800 bg-black/40 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-emerald-500/60"
@@ -642,19 +734,12 @@ function AdminDashboard() {
 }
 
 export default function MatadorVaultPage() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.sessionStorage.getItem(SESSION_KEY) === "true";
+  });
   const [accessKey, setAccessKey] = useState("");
-  const [checking, setChecking] = useState(true);
   const [shake, setShake] = useState(false);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const stored = window.sessionStorage.getItem(SESSION_KEY);
-    if (stored === "true") {
-      setIsAuthenticated(true);
-    }
-    setChecking(false);
-  }, []);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -669,16 +754,6 @@ export default function MatadorVaultPage() {
       setAccessKey("");
     }
   };
-
-  if (checking) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-black">
-        <p className="animate-pulse text-xs text-zinc-500">
-          Verificando acceso a la bóveda...
-        </p>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-black via-zinc-950 to-zinc-900 text-zinc-50">

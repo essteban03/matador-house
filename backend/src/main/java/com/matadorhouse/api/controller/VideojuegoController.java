@@ -68,6 +68,11 @@ public class VideojuegoController {
         v.setImagenUrl(body.getImagenUrl());
         v.setPrecioPrincipal(body.getPrecioPrincipal());
         v.setPrecioSecundaria(body.getPrecioSecundaria());
+        // Ofertas de Marzo (precio especial por cuenta + rango de fechas)
+        v.setPrecioOfertaPrincipal(body.getPrecioOfertaPrincipal());
+        v.setPrecioOfertaSecundaria(body.getPrecioOfertaSecundaria());
+        v.setOfertaDesde(body.getOfertaDesde());
+        v.setOfertaHasta(body.getOfertaHasta());
         v.setPesoGb(body.getPesoGb());
         v.setEnStock(body.isEnStock());
         Videojuego guardado = videojuegoRepository.save(v);
