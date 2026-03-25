@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { useCartStore } from "../store/cartStore";
 
 export function CartHeader() {
+  const pathname = usePathname();
   const { items, openCart } = useCartStore();
   const itemCount = items.reduce((acc, item) => acc + item.quantity, 0);
   const reducedMotion = useReducedMotion() ?? false;
@@ -22,6 +24,40 @@ export function CartHeader() {
         </Link>
 
         <div className="flex flex-wrap items-center justify-end gap-2 sm:flex-nowrap sm:gap-3">
+          {pathname === "/" && (
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof window === "undefined") return;
+                const target =
+                  document.getElementById("catalogo") ??
+                  document.getElementById("catalogo-top");
+                target?.scrollIntoView({ behavior: "smooth", block: "start" });
+                window.setTimeout(() => {
+                  window.dispatchEvent(
+                    new Event("matador:focus-catalog-search")
+                  );
+                }, 320);
+              }}
+              className="inline-flex items-center justify-center rounded-lg border border-zinc-700/90 bg-zinc-900/50 p-2 text-zinc-300 transition hover:border-emerald-500/50 hover:text-white md:hidden"
+              aria-label="Buscar en el catálogo"
+            >
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </button>
+          )}
           <Link
             href="/guia"
             className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-700/90 bg-zinc-900/50 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-300 transition hover:border-zinc-500 hover:text-zinc-100 sm:px-3 sm:text-[11px]"

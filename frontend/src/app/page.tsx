@@ -6,6 +6,10 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Hero } from "../components/Hero";
 import { PaymentTicker } from "../components/PaymentTicker";
 import { ConfettiBurst } from "../components/ConfettiBurst";
+import {
+  CatalogToolbar,
+  type CategoryTab,
+} from "../components/CatalogToolbar";
 
 type Videojuego = {
   id: number;
@@ -23,14 +27,6 @@ type Videojuego = {
   enStock: boolean;
   imagenUrl?: string | null;
 };
-
-type CategoryTab =
-  | "todos"
-  | "ps5"
-  | "ps4"
-  | "psn_plus"
-  | "accion"
-  | "deportes";
 
 const CATEGORY_TABS: { id: CategoryTab; label: string }[] = [
   { id: "todos", label: "Todos" },
@@ -192,10 +188,42 @@ export default function Home() {
     return () => obs.disconnect();
   }, [ofertasMarzo.length, showConfetti]);
 
+  useEffect(() => {
+    const focusSearch = () => {
+      const isDesktop = window.matchMedia("(min-width: 768px)").matches;
+      const id = isDesktop
+        ? "catalog-search-input-desktop"
+        : "catalog-search-input";
+      requestAnimationFrame(() => document.getElementById(id)?.focus());
+    };
+    window.addEventListener("matador:focus-catalog-search", focusSearch);
+    return () =>
+      window.removeEventListener("matador:focus-catalog-search", focusSearch);
+  }, []);
+
   return (
     <div className="min-h-screen bg-[var(--mh-canvas)] bg-gradient-to-b from-[var(--mh-canvas)] via-zinc-950 to-zinc-950 text-zinc-50">
       <div className="mx-auto flex min-h-screen max-w-6xl flex-col px-4 py-6 sm:px-8 sm:py-8 lg:px-12">
         <Hero onViewOffersClick={scrollToOffers} />
+
+        {!loading && !error && videojuegos.length > 0 && (
+          <div id="catalogo-top" className="md:hidden sticky top-[3.35rem] z-20 -mx-4 mb-3 border-y border-zinc-800/80 bg-zinc-950/92 px-4 py-3 shadow-[0_8px_28px_rgba(0,0,0,0.4)] backdrop-blur-md">
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+              Catálogo
+            </p>
+            <CatalogToolbar
+              tabs={CATEGORY_TABS}
+              search={search}
+              onSearchChange={setSearch}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              filteredCount={filteredGames.length}
+              totalCount={videojuegos.length}
+              layoutIdSuffix="mobile"
+              searchInputId="catalog-search-input"
+            />
+          </div>
+        )}
 
         <motion.div {...sectionReveal}>
           <PaymentTicker />
@@ -406,75 +434,28 @@ export default function Home() {
           </motion.section>
         )}
 
-        {/* Filtros */}
+        {/* Catálogo: filtros escritorio */}
         {!loading && !error && videojuegos.length > 0 && (
           <motion.section
             {...sectionReveal}
             id="ofertas"
-            className="mb-10 space-y-5"
+            className="mb-10 hidden space-y-4 md:block"
           >
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">
-              Filtros
+              Catálogo
             </p>
-
-            <div className="relative max-w-xl">
-              <span
-                className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500"
-                aria-hidden
-              >
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
-              </span>
-              <input
-                type="search"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Buscar por título..."
-                className="w-full rounded-2xl border border-zinc-800 bg-zinc-950/80 py-3.5 pl-12 pr-4 text-sm text-zinc-100 shadow-inner outline-none ring-emerald-500/20 transition placeholder:text-zinc-600 focus:border-emerald-500/50 focus:ring-2"
+            <div className="max-w-2xl">
+              <CatalogToolbar
+                tabs={CATEGORY_TABS}
+                search={search}
+                onSearchChange={setSearch}
+                activeTab={activeTab}
+                onTabChange={setActiveTab}
+                filteredCount={filteredGames.length}
+                totalCount={videojuegos.length}
+                layoutIdSuffix="desktop"
+                searchInputId="catalog-search-input-desktop"
               />
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              {CATEGORY_TABS.map((tab) => {
-                const active = activeTab === tab.id;
-                return (
-                  <motion.button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => setActiveTab(tab.id)}
-                    whileTap={{ scale: 0.97 }}
-                    className={`relative overflow-hidden rounded-full px-4 py-2 text-xs font-semibold tracking-wide transition ${
-                      active
-                        ? "text-black"
-                        : "border border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:border-zinc-600 hover:text-zinc-200"
-                    }`}
-                  >
-                    {active && (
-                      <motion.span
-                        layoutId="category-tab-active"
-                        className="absolute inset-0 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-600"
-                        transition={{
-                          type: "spring",
-                          stiffness: 380,
-                          damping: 30,
-                        }}
-                      />
-                    )}
-                    <span className="relative z-10">{tab.label}</span>
-                  </motion.button>
-                );
-              })}
             </div>
           </motion.section>
         )}
@@ -526,12 +507,13 @@ export default function Home() {
                   </motion.div>
                 ) : (
                   <motion.main
+                    id="catalogo"
                     key="grid-results"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.2 }}
-                    className="grid flex-1 grid-cols-1 gap-6 pb-10 sm:grid-cols-2 lg:grid-cols-3"
+                    className="scroll-mt-36 grid flex-1 grid-cols-1 gap-6 pb-10 sm:grid-cols-2 sm:scroll-mt-28 lg:grid-cols-3"
                   >
                     <AnimatePresence mode="popLayout">
                       {filteredGames.map((game) => (
