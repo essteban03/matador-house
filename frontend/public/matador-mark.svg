@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 160" fill="none" aria-hidden="true">
+  <title>Matador House</title>
+  <defs>
+    <linearGradient id="mh-emerald" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#06b6d4" stop-opacity="0.85"/>
+    </linearGradient>
+    <linearGradient id="mh-amber" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fcd34d" stop-opacity="0.75"/>
+      <stop offset="100%" stop-color="#34d399" stop-opacity="0.5"/>
+    </linearGradient>
+  </defs>
+  <!-- Monogram M + techo (marca estática para favicon / OG auxiliar) -->
+  <path fill="url(#mh-emerald)" d="M52 118V42h18l28 48 28-48h18v76H136V74l-22 38h-28L80 74v44H52Z"/>
+  <path fill="url(#mh-amber)" d="M168 42h20v76h-20V42Z"/>
+  <path fill="url(#mh-amber)" fill-opacity="0.6" d="M162 34 188 18l14 20-24 12-16-16Z"/>
+</svg>

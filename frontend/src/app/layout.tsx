@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Bebas_Neue, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import CartDrawer from "../components/CartDrawer";
 import { CartHeader } from "../components/CartHeader";
@@ -15,6 +15,12 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const display = Bebas_Neue({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-display",
+});
+
 export const metadata: Metadata = {
   title: "Matador House",
   description: "E-commerce premium de videojuegos digitales",
@@ -28,7 +34,7 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${display.variable} bg-[var(--mh-canvas)] antialiased text-zinc-100`}
       >
         <CartHeader />
         {children}

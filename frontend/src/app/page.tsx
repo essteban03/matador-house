@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Hero } from "../components/Hero";
 import { PaymentTicker } from "../components/PaymentTicker";
 import { ConfettiBurst } from "../components/ConfettiBurst";
@@ -84,11 +84,21 @@ function matchesCategoryTab(game: Videojuego, tab: CategoryTab): boolean {
 }
 
 export default function Home() {
+  const reducedMotion = useReducedMotion() ?? false;
   const [videojuegos, setVideojuegos] = useState<Videojuego[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState<CategoryTab>("todos");
+
+  const sectionReveal = reducedMotion
+    ? {}
+    : {
+        initial: { opacity: 0, y: 16 },
+        whileInView: { opacity: 1, y: 0 },
+        viewport: { once: true, margin: "-10% 0px -8% 0px" },
+        transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
+      };
 
   useEffect(() => {
     const fetchVideojuegos = async () => {
@@ -183,69 +193,74 @@ export default function Home() {
   }, [ofertasMarzo.length, showConfetti]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-black via-zinc-950 to-zinc-900 text-zinc-50">
-      <div className="mx-auto flex min-h-screen max-w-6xl flex-col px-4 py-10 sm:px-8 lg:px-12">
+    <div className="min-h-screen bg-[var(--mh-canvas)] bg-gradient-to-b from-[var(--mh-canvas)] via-zinc-950 to-zinc-950 text-zinc-50">
+      <div className="mx-auto flex min-h-screen max-w-6xl flex-col px-4 py-6 sm:px-8 sm:py-8 lg:px-12">
         <Hero onViewOffersClick={scrollToOffers} />
 
-        <PaymentTicker />
+        <motion.div {...sectionReveal}>
+          <PaymentTicker />
+        </motion.div>
 
         {/* Trust bar */}
-        <section className="mb-6 grid gap-4 text-xs text-zinc-300 sm:grid-cols-3">
-          <div className="flex items-start gap-3 rounded-2xl border border-zinc-800 bg-zinc-950/80 px-4 py-3 shadow-[0_0_24px_rgba(34,197,94,0.25)]">
+        <motion.section
+          {...sectionReveal}
+          className="mb-6 grid gap-3 text-xs text-zinc-300 sm:grid-cols-3 sm:gap-4"
+        >
+          <div className="flex items-start gap-3 rounded-xl border border-zinc-800/70 bg-zinc-950/50 px-4 py-3">
             <span className="mt-0.5 text-xl leading-none text-emerald-400">
               ⚡
             </span>
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-zinc-400">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">
                 Entrega instantánea
               </p>
-              <p className="mt-1 text-[11px] text-zinc-400">
+              <p className="mt-1 text-[11px] leading-relaxed text-zinc-400">
                 Recibe los datos de tu cuenta y la guía de activación en
                 minutos, directamente en tu WhatsApp.
               </p>
             </div>
           </div>
-          <div className="flex items-start gap-3 rounded-2xl border border-zinc-800 bg-zinc-950/80 px-4 py-3 shadow-[0_0_24px_rgba(37,99,235,0.3)]">
-            <span className="mt-0.5 text-xl leading-none text-emerald-300">
+          <div className="flex items-start gap-3 rounded-xl border border-zinc-800/70 bg-zinc-950/50 px-4 py-3">
+            <span className="mt-0.5 text-xl leading-none text-zinc-300">
               🛡️
             </span>
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-zinc-400">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">
                 Compra segura
               </p>
-              <p className="mt-1 text-[11px] text-zinc-400">
+              <p className="mt-1 text-[11px] leading-relaxed text-zinc-400">
                 Cuentas verificadas, reglas claras y reemplazos sujetos a
                 nuestra garantía técnica.
               </p>
             </div>
           </div>
-          <div className="flex items-start gap-3 rounded-2xl border border-zinc-800 bg-zinc-950/80 px-4 py-3 shadow-[0_0_24px_rgba(147,197,253,0.3)]">
-            <span className="mt-0.5 text-xl leading-none text-cyan-300">
+          <div className="flex items-start gap-3 rounded-xl border border-zinc-800/70 bg-zinc-950/50 px-4 py-3">
+            <span className="mt-0.5 text-xl leading-none text-zinc-300">
               🎧
             </span>
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-zinc-400">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">
                 Soporte premium
               </p>
-              <p className="mt-1 text-[11px] text-zinc-400">
+              <p className="mt-1 text-[11px] leading-relaxed text-zinc-400">
                 Te acompañamos durante la activación y resolvemos dudas
                 avanzadas sobre PS4 y PS5.
               </p>
             </div>
           </div>
-        </section>
+        </motion.section>
 
         {/* Centro de Soporte */}
-        <section className="mb-10">
-          <div className="relative overflow-hidden rounded-2xl border border-cyan-500/30 bg-zinc-950/70 px-5 py-4 shadow-[0_0_35px_rgba(8,47,73,0.8)] backdrop-blur-xl sm:px-7 sm:py-5">
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_0%_0%,rgba(34,197,235,0.4),transparent_55%),radial-gradient(circle_at_100%_100%,rgba(8,47,73,0.7),transparent_60%)] opacity-60" />
+        <motion.section {...sectionReveal} className="mb-8">
+          <div className="relative overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-950/60 px-5 py-4 sm:px-7 sm:py-5">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_0%_0%,rgba(6,182,212,0.12),transparent_58%),radial-gradient(circle_at_100%_100%,rgba(8,47,73,0.35),transparent_55%)] opacity-90" />
             <div className="relative z-10 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-400/50 bg-cyan-500/15 text-lg text-cyan-300 shadow-[0_0_22px_rgba(34,197,235,0.7)]">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-700/80 bg-zinc-900/80 text-lg text-cyan-400/90">
                   📘
                 </div>
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-cyan-300/80">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">
                     Centro de soporte
                   </p>
                   <p className="mt-1 text-[13px] text-zinc-100 sm:text-sm">
@@ -257,43 +272,37 @@ export default function Home() {
               <Link href="/guia" className="relative mt-1 inline-flex">
                 <motion.button
                   type="button"
-                  className="relative inline-flex items-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600 px-5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-black shadow-[0_0_26px_rgba(56,189,248,0.9)]"
-                  whileHover={{ y: -1, scale: 1.02 }}
-                  whileTap={{ scale: 0.97 }}
+                  className="relative inline-flex items-center gap-2 rounded-xl border border-cyan-500/40 bg-cyan-500/10 px-5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-100 transition hover:border-cyan-400/60 hover:bg-cyan-500/15"
+                  whileHover={reducedMotion ? undefined : { y: -1 }}
+                  whileTap={reducedMotion ? undefined : { scale: 0.98 }}
                 >
-                  <motion.span
-                    aria-hidden
-                    className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,transparent,rgba(248,250,252,0.85),transparent)]"
-                    initial={{ x: "-120%" }}
-                    animate={{ x: ["-120%", "130%"] }}
-                    transition={{ duration: 1.4, repeat: Infinity, repeatDelay: 1.6 }}
-                  />
-                  <span className="relative z-10">Ir a la guía</span>
+                  <span>Ir a la guía</span>
                 </motion.button>
               </Link>
             </div>
           </div>
-        </section>
+        </motion.section>
 
         {/* Ofertas de Marzo */}
         {!loading && !error && ofertasMarzo.length > 0 && (
-          <section
+          <motion.section
+            {...sectionReveal}
             ref={ofertasMarzoRef}
             id="ofertas-marzo"
-            className="relative mb-10 overflow-hidden rounded-3xl border border-cyan-500/20 bg-gradient-to-b from-cyan-950/30 via-zinc-950/60 to-black px-4 py-6 shadow-[0_0_45px_rgba(6,182,212,0.10)] sm:px-7 sm:py-8"
+            className="relative mb-8 overflow-hidden rounded-2xl border border-zinc-800/80 bg-zinc-950/40 px-4 py-6 sm:px-7 sm:py-8"
           >
             <ConfettiBurst active={showConfetti} />
 
             <div className="relative z-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-300/80">
-                  OFERTAS DE MARZO
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">
+                  Ofertas de marzo
                 </p>
-                <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-zinc-50 sm:text-3xl">
+                <h2 className="mt-1 text-2xl font-bold tracking-tight text-zinc-50 sm:text-3xl">
                   Precios especiales de tiempo limitado
                 </h2>
               </div>
-              <div className="rounded-2xl border border-cyan-400/30 bg-cyan-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-200">
+              <div className="rounded-lg border border-zinc-700/80 bg-zinc-900/50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-zinc-300">
                 Activas ahora
               </div>
             </div>
@@ -312,10 +321,10 @@ export default function Home() {
                   <Link
                     key={game.id}
                     href={`/juego/${game.id}`}
-                    className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-cyan-400/20 bg-gradient-to-br from-cyan-950/10 via-zinc-950/60 to-black p-4 shadow-[0_0_25px_rgba(0,255,255,0.10)] transition hover:border-cyan-400/40"
+                    className="group relative flex h-full flex-col overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-950/50 p-4 transition hover:border-zinc-600/80"
                   >
-                    <div className="absolute right-3 top-3 rounded-full border border-cyan-400/40 bg-cyan-500/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-200">
-                      OFERTA
+                    <div className="absolute right-3 top-3 rounded-md border border-zinc-700/80 bg-zinc-900/80 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-300">
+                      Oferta
                     </div>
 
                     <div className="relative mb-3 aspect-[4/3] w-full shrink-0 overflow-hidden rounded-xl bg-zinc-900/80">
@@ -394,16 +403,14 @@ export default function Home() {
                 );
               })}
             </div>
-          </section>
+          </motion.section>
         )}
 
         {/* Filtros */}
         {!loading && !error && videojuegos.length > 0 && (
           <motion.section
+            {...sectionReveal}
             id="ofertas"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35 }}
             className="mb-10 space-y-5"
           >
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">
@@ -456,7 +463,7 @@ export default function Home() {
                     {active && (
                       <motion.span
                         layoutId="category-tab-active"
-                        className="absolute inset-0 bg-gradient-to-r from-emerald-500 via-cyan-500 to-violet-500 shadow-[0_0_24px_rgba(34,197,94,0.45)]"
+                        className="absolute inset-0 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-600"
                         transition={{
                           type: "spring",
                           stiffness: 380,

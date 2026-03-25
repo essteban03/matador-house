@@ -1,48 +1,55 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { useCartStore } from "../store/cartStore";
 
 export function CartHeader() {
   const { items, openCart } = useCartStore();
   const itemCount = items.reduce((acc, item) => acc + item.quantity, 0);
+  const reducedMotion = useReducedMotion() ?? false;
+  const { scrollYProgress } = useScroll();
+  const progressScale = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
   return (
-    <header className="sticky top-0 z-30 border-b border-zinc-900/80 bg-black/60 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-8 lg:px-12">
-        <div className="flex items-center gap-2">
-          <span className="h-6 w-6 rounded-lg bg-gradient-to-br from-emerald-400 via-cyan-400 to-violet-500" />
-          <span className="bg-gradient-to-r from-emerald-400 via-cyan-400 to-violet-500 bg-clip-text text-sm font-semibold uppercase tracking-[0.24em] text-transparent">
+    <header className="sticky top-0 z-30 border-b border-zinc-800/80 bg-zinc-950/85 backdrop-blur-md">
+      <div className="relative mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-2.5 sm:px-8 lg:px-12">
+        <Link href="/" className="flex items-center gap-2.5 transition opacity-90 hover:opacity-100">
+          <span className="h-5 w-5 rounded-md bg-gradient-to-br from-emerald-400 via-cyan-400 to-teal-500 ring-1 ring-white/10" />
+          <span className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-200">
             Matador House
           </span>
-        </div>
+        </Link>
 
-        <div className="flex flex-wrap items-center gap-3 justify-end sm:flex-nowrap">
+        <div className="flex flex-wrap items-center justify-end gap-2 sm:flex-nowrap sm:gap-3">
           <Link
             href="/guia"
-            className="inline-flex items-center gap-2 rounded-full border border-cyan-400/40 bg-zinc-950/80 px-2 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-200 shadow-[0_0_18px_rgba(34,197,235,0.55)] transition hover:border-cyan-300/80 hover:text-cyan-50 sm:px-3 sm:inline-flex"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-700/90 bg-zinc-900/50 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-300 transition hover:border-zinc-500 hover:text-zinc-100 sm:px-3 sm:text-[11px]"
           >
-            <span className="text-xs leading-none">?</span>
+            <span className="text-xs leading-none text-zinc-500" aria-hidden>
+              ?
+            </span>
             <span>Guía</span>
           </Link>
 
           <Link
             href="/ps-plus"
-            className="inline-flex items-center gap-2 rounded-full border border-amber-400/40 bg-zinc-950/80 px-2 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200 shadow-[0_0_18px_rgba(250,204,21,0.45)] transition hover:border-amber-300/80 hover:text-amber-100 sm:px-3 sm:inline-flex"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-amber-500/35 bg-zinc-900/50 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-amber-100/95 transition hover:border-amber-400/50 hover:text-amber-50 sm:px-3 sm:text-[11px]"
           >
-            <span className="text-sm leading-none sm:text-base">⭐</span>
+            <span className="text-xs leading-none sm:text-sm" aria-hidden>
+              ⭐
+            </span>
             <span>PS Plus</span>
           </Link>
 
           <motion.button
             type="button"
             onClick={openCart}
-            className="relative inline-flex items-center gap-2 rounded-full border border-zinc-800 bg-zinc-950/80 px-3 py-1.5 text-xs text-zinc-200 shadow-[0_0_18px_rgba(0,0,0,0.6)] hover:border-emerald-500/60 hover:text-emerald-300"
-            whileHover={{ y: -1 }}
-            whileTap={{ scale: 0.96 }}
+            className="relative inline-flex items-center gap-2 rounded-lg border border-zinc-700/90 bg-zinc-900/50 px-2.5 py-1.5 text-[11px] text-zinc-200 transition hover:border-zinc-500 hover:text-white sm:px-3"
+            whileHover={reducedMotion ? undefined : { y: -0.5 }}
+            whileTap={reducedMotion ? undefined : { scale: 0.98 }}
           >
-            <span className="relative flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-cyan-400 text-[13px] text-black">
+            <span className="relative flex h-5 w-5 items-center justify-center rounded-md bg-gradient-to-br from-emerald-400 to-cyan-500 text-[11px] text-black">
               🛒
             </span>
             <span>Carrito</span>
@@ -52,7 +59,7 @@ export function CartHeader() {
                 initial={{ scale: 0.6, opacity: 0, y: -4 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 transition={{ type: "spring", stiffness: 260, damping: 20 }}
-                className="min-w-[1.5rem] rounded-full bg-emerald-400/10 px-2 text-center text-[11px] font-semibold text-emerald-300"
+                className="min-w-[1.35rem] rounded-md bg-zinc-800 px-1.5 text-center text-[10px] font-semibold text-emerald-300"
               >
                 {itemCount}
               </motion.span>
@@ -60,7 +67,14 @@ export function CartHeader() {
           </motion.button>
         </div>
       </div>
+
+      {!reducedMotion && (
+        <motion.div
+          aria-hidden
+          className="pointer-events-none h-0.5 origin-left bg-gradient-to-r from-emerald-500 via-cyan-400 to-teal-500"
+          style={{ scaleX: progressScale }}
+        />
+      )}
     </header>
   );
 }
-
