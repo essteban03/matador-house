@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { useCartStore } from "../store/cartStore";
+import { usePressRipple } from "./ui/usePressRipple";
 
 export function CartHeader() {
   const pathname = usePathname();
@@ -12,13 +13,17 @@ export function CartHeader() {
   const reducedMotion = useReducedMotion() ?? false;
   const { scrollYProgress } = useScroll();
   const progressScale = useTransform(scrollYProgress, [0, 1], [0, 1]);
+  const triggerRipple = usePressRipple();
 
   return (
-    <header className="sticky top-0 z-30 border-b border-zinc-800/80 bg-zinc-950/85 backdrop-blur-md">
-      <div className="relative mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-2.5 sm:px-8 lg:px-12">
-        <Link href="/" className="flex items-center gap-2.5 transition opacity-90 hover:opacity-100">
-          <span className="h-5 w-5 rounded-md bg-gradient-to-br from-emerald-400 via-cyan-400 to-teal-500 ring-1 ring-white/10" />
-          <span className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-200">
+    <header className="sticky top-0 z-40 border-b border-white/10 bg-[#070a13]/70 backdrop-blur-xl">
+      <div className="relative mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-8 lg:px-12">
+        <Link
+          href="/"
+          className="mh-focus inline-flex items-center gap-2.5 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 transition"
+        >
+          <span className="h-5 w-5 rounded-md bg-gradient-to-br from-cyan-300 via-cyan-400 to-fuchsia-500 shadow-[0_0_24px_rgba(34,211,238,0.35)] ring-1 ring-white/15" />
+          <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-100">
             Matador House
           </span>
         </Link>
@@ -39,7 +44,10 @@ export function CartHeader() {
                   );
                 }, 320);
               }}
-              className="inline-flex items-center justify-center rounded-lg border border-zinc-700/90 bg-zinc-900/50 p-2 text-zinc-300 transition hover:border-emerald-500/50 hover:text-white md:hidden"
+              onPointerDown={(e) => {
+                triggerRipple(e);
+              }}
+              className="mh-pressable mh-focus inline-flex items-center justify-center rounded-xl border border-white/15 bg-white/[0.04] p-2 text-zinc-300 transition hover:text-white md:hidden"
               aria-label="Buscar en el catálogo"
             >
               <svg
@@ -60,7 +68,7 @@ export function CartHeader() {
           )}
           <Link
             href="/guia"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-700/90 bg-zinc-900/50 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-300 transition hover:border-zinc-500 hover:text-zinc-100 sm:px-3 sm:text-[11px]"
+            className="mh-focus inline-flex items-center gap-1.5 rounded-xl border border-white/15 bg-white/[0.04] px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-300 transition hover:text-zinc-100 sm:px-3 sm:text-[11px]"
           >
             <span className="text-xs leading-none text-zinc-500" aria-hidden>
               ?
@@ -70,7 +78,7 @@ export function CartHeader() {
 
           <Link
             href="/ps-plus"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-amber-500/35 bg-zinc-900/50 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-amber-100/95 transition hover:border-amber-400/50 hover:text-amber-50 sm:px-3 sm:text-[11px]"
+            className="mh-focus inline-flex items-center gap-1.5 rounded-xl border border-fuchsia-400/30 bg-fuchsia-500/10 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-fuchsia-100 transition hover:border-fuchsia-300/50 hover:text-fuchsia-50 sm:px-3 sm:text-[11px]"
           >
             <span className="text-xs leading-none sm:text-sm" aria-hidden>
               ⭐
@@ -81,11 +89,12 @@ export function CartHeader() {
           <motion.button
             type="button"
             onClick={openCart}
-            className="relative inline-flex items-center gap-2 rounded-lg border border-zinc-700/90 bg-zinc-900/50 px-2.5 py-1.5 text-[11px] text-zinc-200 transition hover:border-zinc-500 hover:text-white sm:px-3"
+            onPointerDown={(e) => triggerRipple(e)}
+            className="mh-pressable mh-focus relative inline-flex items-center gap-2 rounded-xl border border-cyan-300/30 bg-cyan-500/10 px-2.5 py-1.5 text-[11px] text-cyan-50 transition hover:border-cyan-200/60 hover:text-white sm:px-3"
             whileHover={reducedMotion ? undefined : { y: -0.5 }}
             whileTap={reducedMotion ? undefined : { scale: 0.98 }}
           >
-            <span className="relative flex h-5 w-5 items-center justify-center rounded-md bg-gradient-to-br from-emerald-400 to-cyan-500 text-[11px] text-black">
+            <span className="relative flex h-5 w-5 items-center justify-center rounded-md bg-gradient-to-br from-cyan-300 to-fuchsia-400 text-[11px] text-black">
               🛒
             </span>
             <span>Carrito</span>
@@ -95,7 +104,7 @@ export function CartHeader() {
                 initial={{ scale: 0.6, opacity: 0, y: -4 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 transition={{ type: "spring", stiffness: 260, damping: 20 }}
-                className="min-w-[1.35rem] rounded-md bg-zinc-800 px-1.5 text-center text-[10px] font-semibold text-emerald-300"
+                className="min-w-[1.35rem] rounded-md bg-[#0e1f33] px-1.5 text-center text-[10px] font-semibold text-cyan-200"
               >
                 {itemCount}
               </motion.span>
@@ -107,7 +116,7 @@ export function CartHeader() {
       {!reducedMotion && (
         <motion.div
           aria-hidden
-          className="pointer-events-none h-0.5 origin-left bg-gradient-to-r from-emerald-500 via-cyan-400 to-teal-500"
+          className="pointer-events-none h-0.5 origin-left bg-gradient-to-r from-cyan-400 via-fuchsia-400 to-violet-400"
           style={{ scaleX: progressScale }}
         />
       )}

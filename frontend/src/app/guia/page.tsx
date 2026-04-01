@@ -17,14 +17,33 @@ export default function GuiaPage() {
     "https://wa.me/593962545689?text=Hola%20Matador%20House,%20tengo%20dudas%20sobre%20la%20gu%C3%ADa%20de%20activaci%C3%B3n.";
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-black via-zinc-950 to-zinc-900 text-zinc-50">
-      <div className="mx-auto flex min-h-screen max-w-6xl flex-col px-4 py-10 sm:px-8 lg:px-12">
+    <div className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_10%_0%,rgba(34,211,238,0.18),transparent_34%),radial-gradient(circle_at_88%_12%,rgba(217,70,239,0.16),transparent_36%),linear-gradient(180deg,#05070d_0%,#080c16_54%,#06070d_100%)] text-zinc-50">
+      <motion.div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.7 }}
+      >
+        <div className="absolute inset-0 mh-grain opacity-[0.08] mix-blend-overlay" />
+        <motion.div
+          className="absolute -left-16 top-20 h-64 w-64 rounded-full bg-cyan-400/15 blur-3xl"
+          animate={{ y: [0, 20, -8, 0], opacity: [0.3, 0.5, 0.3] }}
+          transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute -right-10 top-10 h-72 w-72 rounded-full bg-fuchsia-500/12 blur-3xl"
+          animate={{ y: [0, -20, 8, 0], opacity: [0.25, 0.45, 0.25] }}
+          transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </motion.div>
+      <div className="relative z-10 mx-auto flex min-h-screen max-w-6xl flex-col px-4 py-10 sm:px-8 lg:px-12">
         {/* Header */}
         <header className="mb-8 space-y-3">
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-zinc-500">
             Guía técnica
           </p>
-          <h1 className="bg-gradient-to-r from-emerald-400 via-cyan-400 to-violet-400 bg-clip-text text-3xl font-extrabold tracking-tight text-transparent sm:text-4xl">
+          <h1 className="mh-gradient-text text-3xl font-extrabold tracking-tight sm:text-4xl">
             Cómo activar tus juegos digitales de Matador House
           </h1>
           <p className="max-w-2xl text-sm text-zinc-300">
@@ -36,7 +55,7 @@ export default function GuiaPage() {
 
         {/* Tabs */}
         <section className="mb-8">
-          <div className="inline-flex rounded-2xl border border-zinc-800 bg-zinc-950/70 p-1 text-xs">
+          <div className="inline-flex rounded-2xl border border-white/10 bg-zinc-950/60 p-1 text-xs backdrop-blur-xl">
             {TABS.map((tab) => {
               const active = activeTab === tab.id;
               return (
@@ -55,7 +74,7 @@ export default function GuiaPage() {
                   {active && (
                     <motion.span
                       layoutId="guia-tab"
-                      className="absolute inset-0 rounded-xl bg-gradient-to-r from-emerald-500 via-cyan-500 to-sky-500 shadow-[0_0_24px_rgba(34,197,94,0.5)]"
+                      className="absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-500 via-violet-500 to-fuchsia-500 shadow-[0_0_24px_rgba(34,211,238,0.5)]"
                       transition={{ type: "spring", stiffness: 320, damping: 26 }}
                     />
                   )}
@@ -156,7 +175,7 @@ function Ps5Guide() {
   return (
     <section className="grid gap-8 md:grid-cols-2">
       {/* PS5 Principal */}
-      <div className="rounded-3xl border border-zinc-800 bg-zinc-950/70 p-5 shadow-[0_0_30px_rgba(15,23,42,0.9)]">
+      <div className="mh-organic-card mh-glass rounded-3xl border border-white/10 p-5 shadow-[0_0_30px_rgba(10,16,30,0.65)]">
         <h2 className="mb-2 text-xs font-semibold uppercase tracking-[0.24em] text-zinc-500">
           PS5 · Cuenta principal
         </h2>
@@ -193,7 +212,7 @@ function Ps5Guide() {
       </div>
 
       {/* PS5 Secundaria */}
-      <div className="rounded-3xl border border-zinc-800 bg-zinc-950/70 p-5 shadow-[0_0_30px_rgba(15,23,42,0.9)]">
+      <div className="mh-organic-card mh-glass rounded-3xl border border-white/10 p-5 shadow-[0_0_30px_rgba(10,16,30,0.65)]">
         <h2 className="mb-2 text-xs font-semibold uppercase tracking-[0.24em] text-zinc-500">
           PS5 · Cuenta secundaria
         </h2>
@@ -231,7 +250,7 @@ function Ps4Guide() {
   return (
     <section className="grid gap-8 md:grid-cols-2">
       {/* PS4 Principal */}
-      <div className="rounded-3xl border border-zinc-800 bg-zinc-950/70 p-5 shadow-[0_0_30px_rgba(15,23,42,0.9)]">
+      <div className="mh-organic-card mh-glass rounded-3xl border border-white/10 p-5 shadow-[0_0_30px_rgba(10,16,30,0.65)]">
         <h2 className="mb-2 text-xs font-semibold uppercase tracking-[0.24em] text-zinc-500">
           PS4 · Cuenta principal
         </h2>
@@ -268,7 +287,7 @@ function Ps4Guide() {
       </div>
 
       {/* PS4 Secundaria */}
-      <div className="rounded-3xl border border-zinc-800 bg-zinc-950/70 p-5 shadow-[0_0_30px_rgba(15,23,42,0.9)]">
+      <div className="mh-organic-card mh-glass rounded-3xl border border-white/10 p-5 shadow-[0_0_30px_rgba(10,16,30,0.65)]">
         <h2 className="mb-2 text-xs font-semibold uppercase tracking-[0.24em] text-zinc-500">
           PS4 · Cuenta secundaria
         </h2>

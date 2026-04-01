@@ -2,7 +2,7 @@
 
 export function Footer() {
   return (
-    <footer className="mt-10 border-t border-zinc-800/70 bg-[var(--mh-canvas)]/95 py-8 text-xs text-zinc-400">
+    <footer className="mt-10 border-t border-white/10 bg-[linear-gradient(180deg,rgba(6,11,20,0.92),rgba(8,10,18,0.96))] py-8 text-xs text-zinc-400 backdrop-blur-xl">
       <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 sm:flex-row sm:items-start sm:justify-between sm:px-8 lg:px-12">
         {/* Redes */}
         <div className="space-y-2">
@@ -14,7 +14,7 @@ export function Footer() {
               href="https://www.tiktok.com"
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1 rounded-lg border border-zinc-800/80 bg-zinc-950/50 px-3 py-1.5 text-[11px] font-medium text-zinc-200 transition hover:border-zinc-600"
+              className="mh-focus inline-flex items-center gap-1 rounded-lg border border-cyan-300/25 bg-cyan-500/10 px-3 py-1.5 text-[11px] font-medium text-cyan-100 transition hover:scale-105"
             >
               <span className="text-base leading-none">🎵</span>
               <span>TikTok</span>
@@ -23,7 +23,7 @@ export function Footer() {
               href="https://www.facebook.com"
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1 rounded-lg border border-zinc-800/80 bg-zinc-950/50 px-3 py-1.5 text-[11px] font-medium text-zinc-200 transition hover:border-zinc-600"
+              className="mh-focus inline-flex items-center gap-1 rounded-lg border border-fuchsia-300/25 bg-fuchsia-500/10 px-3 py-1.5 text-[11px] font-medium text-fuchsia-100 transition hover:scale-105"
             >
               <span className="text-base leading-none">📘</span>
               <span>Facebook</span>

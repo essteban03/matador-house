@@ -24,15 +24,15 @@ function BankRow() {
 
 export function PaymentTicker() {
   return (
-    <section className="mb-10 overflow-hidden rounded-2xl border-y border-cyan-800/30 bg-zinc-950/90">
+    <section className="mh-glass mb-10 overflow-hidden rounded-2xl border border-cyan-300/20">
       <div className="relative">
         {/* Fades laterales tipo “ticker” */}
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-zinc-950/95 to-transparent" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-zinc-950/95 to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-[#0a0f1a]/95 to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-[#0a0f1a]/95 to-transparent" />
 
         <div className="overflow-hidden py-2">
           <motion.div
-            className="flex items-center whitespace-nowrap will-change-transform text-cyan-300"
+            className="flex items-center whitespace-nowrap text-cyan-200 will-change-transform"
             animate={{ x: "-50%" }}
             transition={{ repeat: Infinity, ease: "linear", duration: 32 }}
           >

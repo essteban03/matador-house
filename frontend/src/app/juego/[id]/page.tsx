@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCartStore } from "../../../store/cartStore";
+import { usePressRipple } from "../../../components/ui/usePressRipple";
+import { useUiSound } from "../../../components/ui/useUiSound";
 
 type Videojuego = {
   id: number;
@@ -59,6 +61,8 @@ const MOCK_JUEGO: Videojuego = {
 export default function JuegoDetallePage() {
   const params = useParams<{ id: string }>();
   const { addToCart, openCart } = useCartStore();
+  const triggerRipple = usePressRipple();
+  const { playClick } = useUiSound();
 
   const [juego, setJuego] = useState<Videojuego | null>(null);
   const [listaVideojuegos, setListaVideojuegos] = useState<Videojuego[]>([]);
@@ -153,6 +157,7 @@ export default function JuegoDetallePage() {
   const handleAddToCart = () => {
     if (!juego) return;
     if (precioActualFinal <= 0) return;
+    playClick();
     addToCart({
       gameId: juego.id,
       titulo: juego.titulo,
@@ -165,34 +170,74 @@ export default function JuegoDetallePage() {
 
   if (loading || !juego) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-black via-zinc-950 to-zinc-900 text-zinc-100">
-        <p className="animate-pulse text-sm text-zinc-400">Cargando juego...</p>
+      <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_10%_0%,rgba(34,211,238,0.18),transparent_34%),radial-gradient(circle_at_88%_12%,rgba(217,70,239,0.16),transparent_36%),linear-gradient(180deg,#05070d_0%,#080c16_54%,#06070d_100%)] text-zinc-100">
+        <motion.div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="absolute inset-0 mh-grain opacity-[0.08] mix-blend-overlay" />
+          <motion.div
+            className="absolute -left-16 top-24 h-64 w-64 rounded-full bg-cyan-400/15 blur-3xl"
+            animate={{ y: [0, 18, -6, 0], opacity: [0.3, 0.48, 0.3] }}
+            transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute -right-12 top-12 h-72 w-72 rounded-full bg-fuchsia-500/12 blur-3xl"
+            animate={{ y: [0, -18, 6, 0], opacity: [0.25, 0.42, 0.25] }}
+            transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
+          />
+        </motion.div>
+        <p className="relative z-10 animate-pulse text-sm text-zinc-400">
+          Cargando juego...
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-black via-zinc-950 to-zinc-900 text-zinc-50">
-      <div className="mx-auto flex min-h-screen max-w-6xl flex-col px-4 py-8 sm:px-8 lg:px-12">
+    <div className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_10%_0%,rgba(34,211,238,0.18),transparent_34%),radial-gradient(circle_at_88%_12%,rgba(217,70,239,0.16),transparent_36%),linear-gradient(180deg,#05070d_0%,#080c16_54%,#06070d_100%)] text-zinc-50">
+      <motion.div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.7 }}
+      >
+        <div className="absolute inset-0 mh-grain opacity-[0.08] mix-blend-overlay" />
+        <motion.div
+          className="absolute -left-16 top-20 h-64 w-64 rounded-full bg-cyan-400/15 blur-3xl"
+          animate={{ y: [0, 20, -8, 0], opacity: [0.3, 0.5, 0.3] }}
+          transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute -right-10 top-10 h-72 w-72 rounded-full bg-fuchsia-500/12 blur-3xl"
+          animate={{ y: [0, -20, 8, 0], opacity: [0.25, 0.45, 0.25] }}
+          transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </motion.div>
+      <div className="relative z-10 mx-auto flex min-h-screen max-w-6xl flex-col px-4 py-8 sm:px-8 lg:px-12">
         <header className="mb-8 flex flex-col gap-3 text-sm text-zinc-500 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-zinc-500">
               <span className="h-px w-6 bg-zinc-700" />
               <span>Detalle del juego</span>
             </div>
-            <h1 className="bg-gradient-to-r from-emerald-400 via-cyan-400 to-violet-500 bg-clip-text text-3xl font-extrabold tracking-tight text-transparent sm:text-4xl">
+            <h1 className="mh-gradient-text text-3xl font-extrabold tracking-tight sm:text-4xl">
               {juego.titulo}
             </h1>
           </div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-zinc-800 bg-zinc-900/60 px-4 py-2 text-[11px] text-zinc-400">
-            <span className="inline-flex h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.9)]" />
+          <div className="mh-glass inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-2 text-[11px] text-zinc-300">
+            <span className="inline-flex h-2 w-2 rounded-full bg-cyan-300 shadow-[0_0_12px_rgba(34,211,238,0.9)]" />
             <span>Entrega digital instantánea</span>
           </div>
         </header>
 
         <main className="grid flex-1 grid-cols-1 gap-8 pb-10 lg:grid-cols-2 lg:gap-10">
-          <div className="relative flex items-center justify-center rounded-3xl border border-zinc-800 bg-zinc-950/60 px-4 py-6 sm:px-6 lg:px-8">
-            <div className="relative z-10 aspect-[3/4] w-full max-w-sm overflow-hidden rounded-3xl border border-zinc-800 bg-gradient-to-br from-zinc-900 via-zinc-950 to-black p-0.5 shadow-[0_0_40px_rgba(0,0,0,0.8)]">
+          <div className="relative flex items-center justify-center rounded-3xl border border-white/10 px-4 py-6 sm:px-6 lg:px-8 mh-game-card mh-organic-card">
+            <div className="relative z-10 aspect-[3/4] w-full max-w-sm overflow-hidden rounded-3xl border border-white/12 bg-gradient-to-br from-zinc-900/90 via-zinc-950 to-black/90 p-0.5 shadow-[0_0_48px_rgba(34,211,238,0.12),0_0_40px_rgba(217,70,239,0.08)]">
               <div className="flex h-full flex-col rounded-[1.3rem] bg-gradient-to-b from-slate-900 via-zinc-950 to-black">
                 <div className="flex min-h-0 flex-1 basis-0 items-center justify-center bg-zinc-950/80">
                   {juego.imagenUrl ? (
@@ -240,7 +285,7 @@ export default function JuegoDetallePage() {
               <h3 className="text-xs font-semibold uppercase tracking-[0.24em] text-zinc-500">
                 Elige tu consola
               </h3>
-              <div className="inline-flex rounded-full border border-zinc-800 bg-zinc-950/60 p-1 text-xs">
+              <div className="inline-flex rounded-full border border-white/10 bg-zinc-950/60 p-1 text-xs backdrop-blur-xl">
                 {(["PS4", "PS5"] as const).map((c) => {
                   const active = selectedConsola === c;
                   const disabled = c === "PS4" ? ps4Disabled : ps5Disabled;
@@ -262,7 +307,7 @@ export default function JuegoDetallePage() {
                       {active && !disabled && (
                         <motion.span
                           layoutId="consola-pill"
-                          className="absolute inset-0 rounded-full bg-gradient-to-r from-emerald-500 via-cyan-500 to-sky-500"
+                          className="absolute inset-0 rounded-full bg-gradient-to-r from-cyan-500 via-violet-500 to-fuchsia-500 shadow-[0_0_20px_rgba(34,211,238,0.45)]"
                           transition={{
                             type: "spring",
                             stiffness: 300,
@@ -286,15 +331,16 @@ export default function JuegoDetallePage() {
                   type="button"
                   onClick={() => setSelectedTipoCuenta("PRINCIPAL")}
                   disabled={!hasPrecioPrincipal}
-                  className={`rounded-2xl border px-4 py-4 text-left text-xs transition ${
+                  onPointerDown={(e) => triggerRipple(e)}
+                  className={`mh-pressable mh-focus rounded-2xl border px-4 py-4 text-left text-xs transition ${
                     !hasPrecioPrincipal
                       ? "cursor-not-allowed border-zinc-800 bg-zinc-950/40 opacity-50"
                       : selectedTipoCuenta === "PRINCIPAL"
-                      ? "border-emerald-400/80 bg-emerald-400/10"
+                      ? "border-cyan-400/70 bg-cyan-400/10 shadow-[0_0_20px_rgba(34,211,238,0.15)]"
                       : "border-zinc-800 bg-zinc-950/60 hover:border-zinc-700"
                   }`}
                 >
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-300">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-200">
                     Principal
                   </p>
                   <p className="mt-1 text-zinc-300">
@@ -305,15 +351,16 @@ export default function JuegoDetallePage() {
                   type="button"
                   onClick={() => setSelectedTipoCuenta("SECUNDARIA")}
                   disabled={!hasPrecioSecundaria}
-                  className={`rounded-2xl border px-4 py-4 text-left text-xs transition ${
+                  onPointerDown={(e) => triggerRipple(e)}
+                  className={`mh-pressable mh-focus rounded-2xl border px-4 py-4 text-left text-xs transition ${
                     !hasPrecioSecundaria
                       ? "cursor-not-allowed border-zinc-800 bg-zinc-950/40 opacity-50"
                       : selectedTipoCuenta === "SECUNDARIA"
-                      ? "border-sky-400/80 bg-sky-400/10"
+                      ? "border-fuchsia-400/70 bg-fuchsia-400/10 shadow-[0_0_20px_rgba(217,70,239,0.15)]"
                       : "border-zinc-800 bg-zinc-950/60 hover:border-zinc-700"
                   }`}
                 >
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-sky-300">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-fuchsia-200">
                     Secundaria
                   </p>
                   <p className="mt-1 text-zinc-300">
@@ -335,7 +382,7 @@ export default function JuegoDetallePage() {
                     animate={{ y: 0, opacity: 1 }}
                     exit={{ y: -8, opacity: 0 }}
                     transition={{ type: "spring", stiffness: 260, damping: 22 }}
-                    className="bg-gradient-to-r from-emerald-400 via-cyan-400 to-emerald-300 bg-clip-text text-3xl font-extrabold text-transparent"
+                    className="mh-gradient-text text-3xl font-extrabold"
                   >
                     {new Intl.NumberFormat("es-ES", {
                       style: "currency",
@@ -348,12 +395,13 @@ export default function JuegoDetallePage() {
               <motion.button
                 type="button"
                 onClick={handleAddToCart}
+                onPointerDown={(e) => triggerRipple(e)}
                 disabled={!isPrecioSeleccionadoDisponible}
-                className="group relative inline-flex w-full items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-500 via-cyan-500 to-sky-500 px-6 py-4 text-sm font-semibold tracking-wide text-black shadow-[0_0_32px_rgba(34,197,94,0.6)] disabled:cursor-not-allowed disabled:opacity-60"
+                className="mh-pressable mh-focus group relative inline-flex w-full items-center justify-center overflow-hidden rounded-2xl border border-cyan-300/40 bg-gradient-to-r from-cyan-300 via-cyan-400 to-fuchsia-400 px-6 py-4 text-sm font-semibold tracking-wide text-black shadow-[0_0_32px_rgba(34,211,238,0.4)] disabled:cursor-not-allowed disabled:opacity-60"
                 whileHover={isPrecioSeleccionadoDisponible ? { scale: 1.02 } : {}}
                 whileTap={isPrecioSeleccionadoDisponible ? { scale: 0.97 } : {}}
               >
-                <span className="absolute inset-0 -z-10 animate-pulse bg-gradient-to-r from-emerald-400/40 via-cyan-400/40 to-sky-400/40 opacity-60 blur-xl" />
+                <span className="absolute inset-0 -z-10 animate-pulse bg-gradient-to-r from-cyan-400/40 via-violet-400/35 to-fuchsia-400/40 opacity-60 blur-xl" />
                 <span>
                   {isPrecioSeleccionadoDisponible
                     ? "Añadir al carrito"

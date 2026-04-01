@@ -3,13 +3,16 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Hero } from "../components/Hero";
 import { PaymentTicker } from "../components/PaymentTicker";
 import { ConfettiBurst } from "../components/ConfettiBurst";
+import { GameCard } from "../components/GameCard";
+import { ImmersiveLanding } from "../components/ImmersiveLanding";
+import { SectionMorphDivider } from "../components/SectionMorphDivider";
 import {
   CatalogToolbar,
   type CategoryTab,
 } from "../components/CatalogToolbar";
+import { usePressRipple } from "../components/ui/usePressRipple";
 
 type Videojuego = {
   id: number;
@@ -81,6 +84,15 @@ function matchesCategoryTab(game: Videojuego, tab: CategoryTab): boolean {
 
 export default function Home() {
   const reducedMotion = useReducedMotion() ?? false;
+  const triggerRipple = usePressRipple();
+  const currencyFormatter = useMemo(
+    () =>
+      new Intl.NumberFormat("es-ES", {
+        style: "currency",
+        currency: "USD",
+      }),
+    []
+  );
   const [videojuegos, setVideojuegos] = useState<Videojuego[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -95,7 +107,21 @@ export default function Home() {
         viewport: { once: true, margin: "-10% 0px -8% 0px" },
         transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
       };
-
+  const getCardReveal = (index: number) =>
+    reducedMotion
+      ? {}
+      : {
+          initial: { opacity: 0, y: 50, x: index % 2 === 0 ? -24 : 24 },
+          whileInView: { opacity: 1, y: 0, x: 0 },
+          viewport: { once: true, amount: 0.2 },
+          transition: {
+            duration: 0.5,
+            // Diagonal cascade: wave moves across columns then rows
+            delay:
+              ((index % 3) * 0.065 + Math.floor(index / 3) * 0.035) % 0.42,
+            ease: [0.22, 1, 0.36, 1] as const,
+          },
+        };
   useEffect(() => {
     const fetchVideojuegos = async () => {
       try {
@@ -125,8 +151,8 @@ export default function Home() {
     });
   }, [videojuegos, search, activeTab]);
 
-  const scrollToOffers = () => {
-    const el = document.getElementById("ofertas-marzo");
+  const scrollToCatalog = () => {
+    const el = document.getElementById("catalogo");
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
@@ -164,7 +190,6 @@ export default function Home() {
         return aSpecial - bSpecial;
       });
   }, [videojuegos]);
-
   const ofertasMarzoRef = useRef<HTMLElement | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
 
@@ -202,12 +227,73 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[var(--mh-canvas)] bg-gradient-to-b from-[var(--mh-canvas)] via-zinc-950 to-zinc-950 text-zinc-50">
-      <div className="mx-auto flex min-h-screen max-w-6xl flex-col px-4 py-6 sm:px-8 sm:py-8 lg:px-12">
-        <Hero onViewOffersClick={scrollToOffers} />
+    <div className="min-h-screen bg-[var(--mh-canvas)] text-[var(--mh-text)]">
+      <ImmersiveLanding onEnterCatalog={scrollToCatalog} />
+
+      <SectionMorphDivider />
+
+      <div className="mx-auto flex min-h-screen max-w-7xl flex-col px-4 py-6 sm:px-8 sm:py-8 lg:px-12">
+        <motion.section
+          {...sectionReveal}
+          className="relative mb-7 grid grid-cols-1 gap-4 overflow-visible sm:grid-cols-2 lg:grid-cols-12 lg:auto-rows-[110px]"
+        >
+          <motion.div
+            whileHover={reducedMotion ? undefined : { scale: 1.1 }}
+            className="mh-organic-card mh-glass mh-glow-cyan lg:col-span-5 lg:row-span-2 lg:translate-y-8"
+            data-shape="b"
+          >
+            <div className="p-5">
+              <p className="text-[10px] uppercase tracking-[0.2em] text-cyan-100/80">
+                Entrega instantanea
+              </p>
+              <p className="mt-2 text-xl font-semibold text-zinc-100 sm:text-2xl">5-20 min</p>
+              <p className="text-xs text-zinc-400">activacion guiada por WhatsApp</p>
+            </div>
+          </motion.div>
+
+          <motion.div
+            whileHover={reducedMotion ? undefined : { scale: 1.1 }}
+            className="mh-organic-card mh-glass lg:col-span-4 lg:row-span-2 lg:-translate-y-5"
+            data-shape="d"
+          >
+            <div className="p-5">
+              <p className="text-[10px] uppercase tracking-[0.2em] text-fuchsia-100/80">
+                Compra segura
+              </p>
+              <p className="mt-2 text-sm leading-relaxed text-zinc-200">
+                Cuentas verificadas, reposiciones bajo garantia tecnica y soporte premium.
+              </p>
+            </div>
+          </motion.div>
+
+          <motion.div
+            whileHover={reducedMotion ? undefined : { scale: 1.1 }}
+            className="mh-organic-card mh-glow-magenta border border-fuchsia-300/20 bg-black/35 backdrop-blur-lg lg:col-span-3 lg:row-span-3 lg:translate-y-10"
+            data-shape="c"
+          >
+            <div className="p-5">
+              <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-400">Catalogo</p>
+              <p className="mh-gradient-text mt-2 text-5xl font-semibold leading-none">
+                {videojuegos.length}
+              </p>
+              <p className="mt-2 text-xs text-zinc-300">titulos activos</p>
+              <Link
+                href="/guia"
+                onPointerDown={(event) => triggerRipple(event)}
+                className="mh-pressable mt-4 inline-flex rounded-lg border border-fuchsia-300/35 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-fuchsia-100 transition hover:bg-fuchsia-400/20"
+              >
+                Ir a la guia
+              </Link>
+            </div>
+          </motion.div>
+
+          <div className="lg:col-span-12 lg:-mt-5">
+            <PaymentTicker />
+          </div>
+        </motion.section>
 
         {!loading && !error && videojuegos.length > 0 && (
-          <div id="catalogo-top" className="md:hidden sticky top-[3.35rem] z-20 -mx-4 mb-3 border-y border-zinc-800/80 bg-zinc-950/92 px-4 py-3 shadow-[0_8px_28px_rgba(0,0,0,0.4)] backdrop-blur-md">
+          <div id="catalogo-top" className="md:hidden sticky top-[3.75rem] z-20 -mx-4 mb-3 border-y border-white/10 bg-[#060b14]/88 px-4 py-3 shadow-[0_8px_28px_rgba(0,0,0,0.4)] backdrop-blur-xl">
             <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
               Catálogo
             </p>
@@ -225,91 +311,6 @@ export default function Home() {
           </div>
         )}
 
-        <motion.div {...sectionReveal}>
-          <PaymentTicker />
-        </motion.div>
-
-        {/* Trust bar */}
-        <motion.section
-          {...sectionReveal}
-          className="mb-6 grid gap-3 text-xs text-zinc-300 sm:grid-cols-3 sm:gap-4"
-        >
-          <div className="flex items-start gap-3 rounded-xl border border-zinc-800/70 bg-zinc-950/50 px-4 py-3">
-            <span className="mt-0.5 text-xl leading-none text-emerald-400">
-              ⚡
-            </span>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">
-                Entrega instantánea
-              </p>
-              <p className="mt-1 text-[11px] leading-relaxed text-zinc-400">
-                Recibe los datos de tu cuenta y la guía de activación en
-                minutos, directamente en tu WhatsApp.
-              </p>
-            </div>
-          </div>
-          <div className="flex items-start gap-3 rounded-xl border border-zinc-800/70 bg-zinc-950/50 px-4 py-3">
-            <span className="mt-0.5 text-xl leading-none text-zinc-300">
-              🛡️
-            </span>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">
-                Compra segura
-              </p>
-              <p className="mt-1 text-[11px] leading-relaxed text-zinc-400">
-                Cuentas verificadas, reglas claras y reemplazos sujetos a
-                nuestra garantía técnica.
-              </p>
-            </div>
-          </div>
-          <div className="flex items-start gap-3 rounded-xl border border-zinc-800/70 bg-zinc-950/50 px-4 py-3">
-            <span className="mt-0.5 text-xl leading-none text-zinc-300">
-              🎧
-            </span>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">
-                Soporte premium
-              </p>
-              <p className="mt-1 text-[11px] leading-relaxed text-zinc-400">
-                Te acompañamos durante la activación y resolvemos dudas
-                avanzadas sobre PS4 y PS5.
-              </p>
-            </div>
-          </div>
-        </motion.section>
-
-        {/* Centro de Soporte */}
-        <motion.section {...sectionReveal} className="mb-8">
-          <div className="relative overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-950/60 px-5 py-4 sm:px-7 sm:py-5">
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_0%_0%,rgba(6,182,212,0.12),transparent_58%),radial-gradient(circle_at_100%_100%,rgba(8,47,73,0.35),transparent_55%)] opacity-90" />
-            <div className="relative z-10 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-700/80 bg-zinc-900/80 text-lg text-cyan-400/90">
-                  📘
-                </div>
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">
-                    Centro de soporte
-                  </p>
-                  <p className="mt-1 text-[13px] text-zinc-100 sm:text-sm">
-                    ¿Soporte técnico? Consulta nuestra Guía de Instalación 100% segura
-                    para PS4 y PS5.
-                  </p>
-                </div>
-              </div>
-              <Link href="/guia" className="relative mt-1 inline-flex">
-                <motion.button
-                  type="button"
-                  className="relative inline-flex items-center gap-2 rounded-xl border border-cyan-500/40 bg-cyan-500/10 px-5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-100 transition hover:border-cyan-400/60 hover:bg-cyan-500/15"
-                  whileHover={reducedMotion ? undefined : { y: -1 }}
-                  whileTap={reducedMotion ? undefined : { scale: 0.98 }}
-                >
-                  <span>Ir a la guía</span>
-                </motion.button>
-              </Link>
-            </div>
-          </div>
-        </motion.section>
 
         {/* Ofertas de Marzo */}
         {!loading && !error && ofertasMarzo.length > 0 && (
@@ -317,9 +318,25 @@ export default function Home() {
             {...sectionReveal}
             ref={ofertasMarzoRef}
             id="ofertas-marzo"
-            className="relative mb-8 overflow-hidden rounded-2xl border border-zinc-800/80 bg-zinc-950/40 px-4 py-6 sm:px-7 sm:py-8"
+            className="relative mb-12 overflow-visible px-1 py-4 sm:px-2"
           >
             <ConfettiBurst active={showConfetti} />
+            {!reducedMotion && (
+              <>
+                <motion.div
+                  aria-hidden
+                  className="pointer-events-none absolute -left-10 top-16 h-44 w-44 rounded-full bg-cyan-400/20 blur-3xl"
+                  animate={{ y: [0, -16, 0], opacity: [0.26, 0.45, 0.26] }}
+                  transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+                />
+                <motion.div
+                  aria-hidden
+                  className="pointer-events-none absolute -right-8 bottom-0 h-56 w-56 rounded-full bg-fuchsia-500/20 blur-3xl"
+                  animate={{ y: [0, 20, 0], opacity: [0.2, 0.35, 0.2] }}
+                  transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+                />
+              </>
+            )}
 
             <div className="relative z-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
@@ -335,8 +352,8 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="relative z-10 mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {ofertasMarzo.map((game) => {
+            <div className="relative z-10 mt-7 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {ofertasMarzo.map((game, index) => {
                 const usaPrincipal = (game.precioOfertaPrincipal ?? 0) > 0;
                 const precioEspecial = usaPrincipal
                   ? game.precioOfertaPrincipal ?? 0
@@ -346,93 +363,44 @@ export default function Home() {
                   : game.precioSecundaria;
 
                 return (
-                  <Link
+                  <motion.div
                     key={game.id}
-                    href={`/juego/${game.id}`}
-                    className="group relative flex h-full flex-col overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-950/50 p-4 transition hover:border-zinc-600/80"
+                    {...getCardReveal(index)}
+                    className="min-w-0"
                   >
-                    <div className="absolute right-3 top-3 rounded-md border border-zinc-700/80 bg-zinc-900/80 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-300">
-                      Oferta
+                    <div className="aspect-[3/4] w-full">
+                      <GameCard
+                        href={`/juego/${game.id}`}
+                        onPointerDown={(e) => triggerRipple(e)}
+                        titulo={game.titulo}
+                        imagenUrl={game.imagenUrl}
+                        consola={game.consola}
+                        categoria={game.categoria}
+                        genero={game.genero}
+                        enStock={game.enStock}
+                        index={index}
+                        variant="offer"
+                        precioAntesFormatted={currencyFormatter.format(
+                          precioAntes
+                        )}
+                        precioFormatted={currencyFormatter.format(precioEspecial)}
+                      />
                     </div>
-
-                    <div className="relative mb-3 aspect-[4/3] w-full shrink-0 overflow-hidden rounded-xl bg-zinc-900/80">
-                      {game.imagenUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={game.imagenUrl}
-                          alt={game.titulo}
-                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-                        />
-                      ) : (
-                        <div className="flex h-full items-center justify-center text-xs text-zinc-600">
-                          Sin imagen
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="mb-2 flex items-center justify-between gap-2">
-                      <span
-                        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${
-                          game.consola === "PS5"
-                            ? "bg-gradient-to-r from-indigo-500 to-violet-500 text-white"
-                            : "bg-gradient-to-r from-sky-500 to-emerald-400 text-black"
-                        }`}
-                      >
-                        {game.consola}
-                      </span>
-                      {game.categoria && (
-                        <span className="truncate text-[10px] uppercase tracking-wider text-zinc-500">
-                          {game.categoria}
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="min-h-[56px]">
-                      <h3 className="line-clamp-2 text-lg font-semibold tracking-tight text-zinc-50">
-                        {game.titulo}
-                      </h3>
-                    </div>
-
-                    <div className="mt-auto border-t border-zinc-800/60 pt-3">
-                      <div className="flex items-end justify-between gap-3">
-                        <div className="space-y-1 text-xs text-zinc-500">
-                          <p>
-                            <span className="text-zinc-400">Stock:</span>{" "}
-                            <span
-                              className={
-                                game.enStock ? "text-emerald-400" : "text-red-400"
-                              }
-                            >
-                              {game.enStock ? "Disponible" : "Agotado"}
-                            </span>
-                          </p>
-                        </div>
-
-                        <div className="text-right">
-                          <p className="text-[11px] font-medium text-zinc-400">
-                            Antes
-                          </p>
-                          <p className="text-sm font-semibold text-zinc-500 line-through">
-                            {new Intl.NumberFormat("es-ES", {
-                              style: "currency",
-                              currency: "USD",
-                            }).format(precioAntes)}
-                          </p>
-                          <p className="bg-gradient-to-r from-emerald-400 via-cyan-400 to-emerald-300 bg-clip-text text-2xl font-extrabold text-transparent">
-                            {new Intl.NumberFormat("es-ES", {
-                              style: "currency",
-                              currency: "USD",
-                            }).format(precioEspecial)}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
+                  </motion.div>
                 );
               })}
             </div>
           </motion.section>
         )}
+
+        <motion.div
+          {...sectionReveal}
+          aria-hidden
+          className="pointer-events-none relative mb-4 h-8 overflow-visible"
+        >
+          <div className="absolute inset-x-0 top-1/2 h-px -skew-y-2 bg-gradient-to-r from-transparent via-cyan-300/60 to-transparent" />
+          <div className="absolute inset-x-8 top-1/2 h-px skew-y-2 bg-gradient-to-r from-transparent via-fuchsia-300/55 to-transparent" />
+        </motion.div>
 
         {/* Catálogo: filtros escritorio */}
         {!loading && !error && videojuegos.length > 0 && (
@@ -496,7 +464,7 @@ export default function Home() {
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.94 }}
                     transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                    className="flex flex-1 flex-col items-center justify-center rounded-2xl border border-zinc-800/80 bg-zinc-950/40 py-20 text-center"
+                  className="mh-panel flex flex-1 flex-col items-center justify-center rounded-2xl py-20 text-center"
                   >
                     <p className="max-w-md text-lg font-medium text-zinc-300">
                       No encontramos lo que buscas, ¡prueba con otro nombre!
@@ -509,114 +477,54 @@ export default function Home() {
                   <motion.main
                     id="catalogo"
                     key="grid-results"
+                    layout
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.2 }}
-                    className="scroll-mt-36 grid flex-1 grid-cols-1 gap-6 pb-10 sm:grid-cols-2 sm:scroll-mt-28 lg:grid-cols-3"
+                    className="scroll-mt-36 relative grid flex-1 grid-cols-1 gap-6 pb-10 sm:grid-cols-2 sm:scroll-mt-28 lg:grid-cols-3 xl:grid-cols-4"
                   >
+                    {!reducedMotion && (
+                      <motion.div
+                        aria-hidden
+                        className="pointer-events-none absolute left-1/2 top-16 h-64 w-64 -translate-x-1/2 rounded-full bg-cyan-400/10 blur-3xl"
+                        animate={{ scale: [1, 1.12, 1], opacity: [0.18, 0.34, 0.18] }}
+                        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+                      />
+                    )}
                     <AnimatePresence mode="popLayout">
-                      {filteredGames.map((game) => (
+                      {filteredGames.map((game, index) => (
                         <motion.div
                           key={game.id}
                           layout
-                          initial={{ opacity: 0, scale: 0.92 }}
-                          animate={{ opacity: 1, scale: 1 }}
+                          {...getCardReveal(index)}
                           exit={{ opacity: 0, scale: 0.88 }}
                           transition={{
-                            duration: 0.32,
+                            duration: 0.5,
                             ease: [0.22, 1, 0.36, 1],
+                            layout: { type: "spring", stiffness: 180, damping: 24 },
                           }}
+                          className="min-w-0"
                         >
-                          <Link
-                            href={`/juego/${game.id}`}
-                            className="group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-zinc-800/80 bg-gradient-to-br from-zinc-900 via-zinc-950 to-zinc-900 p-4 shadow-[0_0_25px_rgba(0,0,0,0.65)] transition-colors"
-                          >
-                            <div className="pointer-events-none absolute inset-px rounded-[18px] border border-emerald-400/10 opacity-0 blur-xl transition-opacity duration-300 group-hover:opacity-100" />
-
-                            <div className="relative mb-3 aspect-[4/3] w-full shrink-0 overflow-hidden rounded-xl bg-zinc-900/80">
-                              {game.imagenUrl ? (
-                                <img
-                                  src={game.imagenUrl}
-                                  alt={game.titulo}
-                                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-                                />
-                              ) : (
-                                <div className="flex h-full items-center justify-center text-xs text-zinc-600">
-                                  Sin imagen
-                                </div>
+                          <div className="aspect-[3/4] w-full">
+                            <GameCard
+                              href={`/juego/${game.id}`}
+                              onPointerDown={(e) => triggerRipple(e)}
+                              titulo={game.titulo}
+                              imagenUrl={game.imagenUrl}
+                              consola={game.consola}
+                              categoria={game.categoria}
+                              genero={game.genero}
+                              enStock={game.enStock}
+                              index={index}
+                              variant="catalog"
+                              precioFormatted={currencyFormatter.format(
+                                game.precioPrincipal > 0
+                                  ? game.precioPrincipal
+                                  : game.precioSecundaria
                               )}
-                            </div>
-
-                            <div className="mb-3 flex items-center justify-between gap-2">
-                              <span
-                                className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${
-                                  game.consola === "PS5"
-                                    ? "bg-gradient-to-r from-indigo-500 to-violet-500 text-white"
-                                    : "bg-gradient-to-r from-sky-500 to-emerald-400 text-black"
-                                }`}
-                              >
-                                {game.consola}
-                              </span>
-                              {game.categoria && (
-                                <span className="truncate text-[10px] uppercase tracking-wider text-zinc-500">
-                                  {game.categoria}
-                                </span>
-                              )}
-                            </div>
-
-                            <div className="mb-3 min-h-0 flex-1">
-                              <h2 className="line-clamp-2 text-lg font-semibold tracking-tight text-zinc-50">
-                                {game.titulo}
-                              </h2>
-                              {game.genero && (
-                                <p className="mt-1 text-xs uppercase tracking-wide text-zinc-500">
-                                  {game.genero}
-                                </p>
-                              )}
-                            </div>
-
-                            <div className="mt-auto flex items-end justify-between gap-3 border-t border-zinc-800/60 pt-3">
-                              <div className="space-y-1 text-xs text-zinc-500">
-                                {typeof game.pesoGb === "number" && (
-                                  <p>
-                                    <span className="text-zinc-400">
-                                      Tamaño:
-                                    </span>{" "}
-                                    {game.pesoGb} GB
-                                  </p>
-                                )}
-                                <p>
-                                  <span className="text-zinc-400">Stock:</span>{" "}
-                                  <span
-                                    className={
-                                      game.enStock
-                                        ? "text-emerald-400"
-                                        : "text-red-400"
-                                    }
-                                  >
-                                    {game.enStock ? "Disponible" : "Agotado"}
-                                  </span>
-                                </p>
-                              </div>
-
-                              <div className="text-right">
-                                <p className="text-sm font-medium text-zinc-400">
-                                  Desde
-                                </p>
-                                <p className="bg-gradient-to-r from-emerald-400 via-cyan-400 to-emerald-300 bg-clip-text text-2xl font-extrabold text-transparent">
-                                  {new Intl.NumberFormat("es-ES", {
-                                    style: "currency",
-                                    currency: "USD",
-                                  }).format(
-                                    game.precioPrincipal > 0
-                                      ? game.precioPrincipal
-                                      : game.precioSecundaria
-                                  )}
-                                </p>
-                              </div>
-                            </div>
-                          </Link>
+                            />
+                          </div>
                         </motion.div>
                       ))}
                     </AnimatePresence>

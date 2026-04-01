@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { usePressRipple } from "./ui/usePressRipple";
 
 export type CategoryTab =
   | "todos"
@@ -36,6 +37,7 @@ export function CatalogToolbar({
   className = "",
 }: CatalogToolbarProps) {
   const layoutId = `category-tab-active-${layoutIdSuffix}`;
+  const triggerRipple = usePressRipple();
 
   return (
     <div className={`space-y-3 ${className}`}>
@@ -65,7 +67,7 @@ export function CatalogToolbar({
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="Buscar juego…"
-          className="w-full rounded-xl border border-zinc-800 bg-zinc-950/90 py-3 pl-10 pr-3 text-[15px] text-zinc-100 shadow-inner outline-none ring-emerald-500/15 transition placeholder:text-zinc-600 focus:border-emerald-500/45 focus:ring-2 md:rounded-2xl md:py-3.5 md:pl-12 md:text-sm"
+          className="w-full rounded-xl border border-white/15 bg-white/[0.03] py-3 pl-10 pr-3 text-[15px] text-zinc-100 shadow-inner outline-none ring-cyan-500/15 transition placeholder:text-zinc-600 focus:border-cyan-400/50 focus:ring-2 md:rounded-2xl md:py-3.5 md:pl-12 md:text-sm"
         />
       </div>
 
@@ -81,7 +83,8 @@ export function CatalogToolbar({
           <button
             type="button"
             onClick={() => onSearchChange("")}
-            className="shrink-0 rounded-lg border border-zinc-800/90 bg-zinc-900/60 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-zinc-400 transition hover:border-zinc-600 hover:text-zinc-200"
+            onPointerDown={(e) => triggerRipple(e)}
+            className="mh-pressable mh-focus shrink-0 rounded-lg border border-fuchsia-300/30 bg-fuchsia-500/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-fuchsia-200 transition hover:border-fuchsia-200/50 hover:text-fuchsia-100"
           >
             Limpiar
           </button>
@@ -97,17 +100,18 @@ export function CatalogToolbar({
                 key={tab.id}
                 type="button"
                 onClick={() => onTabChange(tab.id)}
+                onPointerDown={(e) => triggerRipple(e)}
                 whileTap={{ scale: 0.97 }}
-                className={`relative snap-start overflow-hidden rounded-full px-3.5 py-2 text-[11px] font-semibold tracking-wide transition sm:px-4 sm:text-xs ${
+                className={`mh-pressable relative snap-start overflow-hidden rounded-full px-3.5 py-2 text-[11px] font-semibold tracking-wide transition sm:px-4 sm:text-xs ${
                   active
                     ? "text-black"
-                    : "shrink-0 border border-zinc-800 bg-zinc-900/70 text-zinc-400 hover:border-zinc-600 hover:text-zinc-200"
+                    : "mh-focus shrink-0 border border-white/15 bg-white/[0.03] text-zinc-300 hover:text-zinc-100"
                 }`}
               >
                 {active && (
                   <motion.span
                     layoutId={layoutId}
-                    className="absolute inset-0 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-600"
+                    className="absolute inset-0 bg-gradient-to-r from-cyan-400 via-fuchsia-400 to-violet-400"
                     transition={{
                       type: "spring",
                       stiffness: 380,

@@ -54,14 +54,14 @@ export default function CartDrawer() {
 
           {/* Drawer */}
           <motion.aside
-            className="fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col border-l border-zinc-800 bg-zinc-950/80 backdrop-blur-2xl"
+            className="fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col border-l border-cyan-300/15 bg-[linear-gradient(160deg,rgba(10,16,30,0.95),rgba(8,12,24,0.9))] backdrop-blur-2xl"
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", stiffness: 260, damping: 24 }}
           >
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-zinc-800 px-5 py-4">
+            <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
               <div>
                 <p className="text-xs uppercase tracking-[0.24em] text-zinc-500">
                   Carrito
@@ -95,10 +95,10 @@ export default function CartDrawer() {
                     <motion.li
                       key={item.id}
                       layout
-                      className="group flex items-start gap-3 rounded-2xl border border-zinc-800 bg-zinc-950/60 p-3 text-xs"
+                      className="group flex items-start gap-3 rounded-2xl border border-white/10 bg-zinc-950/45 p-3 text-xs backdrop-blur-lg"
                     >
                       {/* Mini indicador visual */}
-                      <div className="mt-1 h-10 w-10 flex-none rounded-xl bg-gradient-to-br from-emerald-500/30 via-cyan-500/20 to-zinc-900" />
+                      <div className="mt-1 h-10 w-10 flex-none rounded-xl bg-gradient-to-br from-cyan-500/40 via-fuchsia-500/25 to-zinc-900" />
 
                       <div className="flex flex-1 flex-col gap-1">
                         <div className="flex items-start justify-between gap-2">
@@ -145,10 +145,10 @@ export default function CartDrawer() {
             </div>
 
             {/* Footer */}
-            <div className="border-t border-zinc-800 bg-gradient-to-t from-black/50 to-zinc-950/80 px-5 py-4">
+            <div className="border-t border-white/10 bg-gradient-to-t from-black/50 to-zinc-950/80 px-5 py-4">
               <div className="mb-3 flex items-center justify-between text-xs">
                 <span className="text-zinc-500">Total a pagar</span>
-                <span className="bg-gradient-to-r from-emerald-400 via-cyan-400 to-emerald-300 bg-clip-text text-lg font-extrabold text-transparent">
+                <span className="mh-gradient-text text-lg font-extrabold">
                   {new Intl.NumberFormat("es-ES", {
                     style: "currency",
                     currency: "EUR",
