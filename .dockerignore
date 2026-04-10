@@ -1,0 +1,17 @@
+# Monorepo: Docker build only needs backend/ (see root Dockerfile)
+frontend/
+node_modules/
+.git/
+.github/
+
+# Local / build artifacts
+_backend-clone/
+_backend-gitmeta/
+backend/target/
+backend/.m2_repo/
+
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
